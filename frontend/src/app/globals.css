@@ -1,0 +1,30 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: #060F1E; color: #E2E8F0;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #060F1E; }
+::-webkit-scrollbar-thumb { background: #1A3A5C; border-radius: 3px; }
+a { color: inherit; text-decoration: none; }
+input, select, button, textarea { font-family: inherit; }
+input:focus, select:focus { border-color: #E65100 !important; }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 9px 12px; font-size: 10px; font-weight: 600; color: #4A6080;
+     text-transform: uppercase; letter-spacing: .06em; border-bottom: 1px solid #1E3A5F; }
+td { padding: 11px 12px; border-bottom: 1px solid rgba(30,58,95,.3); font-size: 12px; }
+tr:hover td { background: #0F2240; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fade-up { animation: fadeUp .3s ease both; }
+
+/* Leaflet popup en thème sombre */
+.leaflet-popup-content-wrapper { background: #0B1A2E; color: #E2E8F0; border: 1px solid #1E3A5F; border-radius: 8px; }
+.leaflet-popup-tip { background: #0B1A2E; }
+.leaflet-container { font-family: inherit; }

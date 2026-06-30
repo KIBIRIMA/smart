@@ -1,0 +1,26 @@
+{
+  "name": "smart-transport-ai-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.18",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "leaflet": "1.9.4",
+    "react-leaflet": "4.2.1",
+    "zustand": "5.0.2",
+    "swr": "2.2.5"
+  },
+  "devDependencies": {
+    "@types/leaflet": "1.9.15",
+    "@types/node": "22.10.2",
+    "@types/react": "18.3.17",
+    "typescript": "5.7.2"
+  }
+}

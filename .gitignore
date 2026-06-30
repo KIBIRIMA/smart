@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+
+# Env & secrets
+.env
+nginx/certs/*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
