@@ -97,8 +97,11 @@ def run_optimization_v11(missions, params=None) -> dict:
     min_theo = rapport.get("tours_min_theorique") or rapport.get("tours_min") or 1
 
     if eng.ORTOOLS_AVAILABLE:
+        # Nombre de véhicules réaliste : min théorique + marge de 40%.
+        # Passer len(liv)+len(rec) rend le problème insoluble pour OR-Tools (trop symétrique).
+        nb_veh = max(min_theo + max(3, int(min_theo * 0.4)), 5)
         tournees = eng.build_tours_ortools(liv, rec, gcache, rc, depot,
-                                           nb_vehicules=len(liv) + len(rec))
+                                           nb_vehicules=nb_veh)
     else:
         tournees = eng.build_tours(liv, rec, gcache, rc, depot)
 
