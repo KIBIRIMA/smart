@@ -121,7 +121,23 @@ def run_optimization_v11(missions, params=None) -> dict:
 
     eng.get_route = _osrm_route
 
-    # 1. Écrire le CSV temporaire
+    # Plafonne le temps OR-Tools à 15s (le moteur le fixe à 45s en dur).
+    # La solution optimale est trouvée en quelques secondes ; 15s suffisent
+    # et le calcul total passe sous 30s (au-delà, la requête HTTP est coupée → 500).
+    try:
+        from ortools.constraint_solver import pywrapcp as _pcp
+        _orig_solve = _pcp.RoutingModel.SolveWithParameters
+        def _capped_solve(self, params, *a, **k):
+            try:
+                if params.time_limit.seconds > 15:
+                    params.time_limit.seconds = 15
+            except Exception:
+                pass
+            return _orig_solve(self, params, *a, **k)
+        _pcp.RoutingModel.SolveWithParameters = _capped_solve
+    except Exception:
+        pass
+
     tmpdir = tempfile.mkdtemp(prefix="sta_v11_")
     csv_path = os.path.join(tmpdir, "missions.csv")
     nb = _missions_to_csv(missions, csv_path)
