@@ -89,19 +89,15 @@ def run_optimization_v11(missions, params=None) -> dict:
     """
     import app.optimizer.tournee_optimizer_v11 as eng
 
-    # Force les caches géocode/routes vers un dossier PERSISTANT.
+    # Cache géocode/routes dans un VOLUME DOCKER persistant (/code/cache_data).
+    # Ce dossier survit aux rebuilds. La 1ère optimisation remplit le cache,
+    # toutes les suivantes sont quasi instantanées (routes lues, pas recalculées).
+    # NB : on NE touche PAS à la pause API (ORS_PAUSE_SEC), qui doit rester à sa
+    # valeur d'origine (1.6s) pour que les appels de routes réussissent.
     cache_dir = "/code/cache_data"
     os.makedirs(cache_dir, exist_ok=True)
     eng.GEOCODE_CACHE_FILE = os.path.join(cache_dir, "geocode_cache.json")
     eng.ROUTE_CACHE_FILE = os.path.join(cache_dir, "route_cache.json")
-
-    # Réduit la pause entre appels API de 1.6s à 0.3s : accélère le calcul ~5x.
-    # Si l'API sature (erreur 429), le moteur bascule automatiquement sur
-    # l'estimation vol d'oiseau × 1.4 (rapide et suffisante pour la planification).
-    try:
-        eng.ORS_PAUSE_SEC = 0.3
-    except Exception:
-        pass
 
     # 1. Écrire le CSV temporaire
     tmpdir = tempfile.mkdtemp(prefix="sta_v11_")
