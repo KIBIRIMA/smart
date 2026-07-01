@@ -89,6 +89,14 @@ def run_optimization_v11(missions, params=None) -> dict:
     """
     import app.optimizer.tournee_optimizer_v11 as eng
 
+    # Force les caches géocode/routes vers un dossier PERSISTANT.
+    # Sans ça, chaque optimisation recalcule toutes les routes (1.6s/route → très lent).
+    # Avec ça, la 1ère optimisation remplit le cache, les suivantes sont quasi instantanées.
+    cache_dir = "/code/cache_data"
+    os.makedirs(cache_dir, exist_ok=True)
+    eng.GEOCODE_CACHE_FILE = os.path.join(cache_dir, "geocode_cache.json")
+    eng.ROUTE_CACHE_FILE = os.path.join(cache_dir, "route_cache.json")
+
     # 1. Écrire le CSV temporaire
     tmpdir = tempfile.mkdtemp(prefix="sta_v11_")
     csv_path = os.path.join(tmpdir, "missions.csv")
