@@ -35,22 +35,47 @@ def _missions_to_csv(missions, path: str) -> int:
         w = csv.writer(f)
         w.writerow(cols)
         for i, m in enumerate(missions, start=1):
-            # Découpe l'adresse complète "rue, CP, ville" si besoin
-            adresse = m.adresse or ""
-            ville = getattr(m, "ville", None) or ""
+            # L'adresse en base est "rue, CP, ville" (ex: "2 AV JEAN JAURES, 94600, CHOISY LE ROI")
+            adresse_complete = (m.adresse or "").strip()
+            parts = [p.strip() for p in adresse_complete.split(",") if p.strip()]
+
+            rue = ""
             cp = ""
-            # tente d'extraire CP (5 chiffres) et ville depuis l'adresse
-            parts = [p.strip() for p in adresse.split(",")] if adresse else []
-            for p in parts:
-                token = p.split()
-                if token and token[0].isdigit() and len(token[0]) == 5:
-                    cp = token[0]
-                    ville = " ".join(token[1:]) or ville
+            ville = ""
+            if len(parts) >= 3:
+                # Format attendu : rue, CP, ville
+                rue = parts[0]
+                # cherche le segment qui est un code postal (5 chiffres)
+                for p in parts[1:]:
+                    tok = p.split()
+                    if tok and tok[0].isdigit() and len(tok[0]) == 5:
+                        cp = tok[0]
+                        reste = " ".join(tok[1:])
+                        if reste:
+                            ville = reste
+                    elif not p[0:1].isdigit():
+                        ville = p  # segment texte = ville
+                if not ville:
+                    ville = parts[-1]
+            elif len(parts) == 2:
+                rue = parts[0]
+                ville = parts[1]
+            elif len(parts) == 1:
+                # une seule valeur : c'est probablement la ville
+                ville = parts[0]
+                rue = parts[0]
+
+            # Sécurité : full_addr du moteur exige rue ET ville non vides
+            if not rue:
+                rue = ville or adresse_complete or "adresse inconnue"
+            if not ville:
+                ville = rue
+
             w.writerow([
                 i, "Chauffeur 1",
                 (m.type_op or "livraison"),
                 (m.client_nom or ""), ville, cp,
-                (parts[0] if parts else adresse),
+                rue,
                 (m.machine_modele or ""), "", "2026-01-01", "05:00", "13:00",
             ])
             n += 1
