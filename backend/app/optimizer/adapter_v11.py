@@ -37,10 +37,10 @@ def _missions_to_csv(missions, path: str) -> int:
         for i, m in enumerate(missions, start=1):
             # Découpe l'adresse complète "rue, CP, ville" si besoin
             adresse = m.adresse or ""
-            ville = getattr(m, "ville", "") or ""
+            ville = getattr(m, "ville", None) or ""
             cp = ""
             # tente d'extraire CP (5 chiffres) et ville depuis l'adresse
-            parts = [p.strip() for p in adresse.split(",")]
+            parts = [p.strip() for p in adresse.split(",")] if adresse else []
             for p in parts:
                 token = p.split()
                 if token and token[0].isdigit() and len(token[0]) == 5:
@@ -48,10 +48,10 @@ def _missions_to_csv(missions, path: str) -> int:
                     ville = " ".join(token[1:]) or ville
             w.writerow([
                 i, "Chauffeur 1",
-                m.type_op or "livraison",
-                m.client_nom or "", ville, cp,
-                parts[0] if parts else adresse,
-                m.machine_modele or "", "", "2026-01-01", "05:00", "13:00",
+                (m.type_op or "livraison"),
+                (m.client_nom or ""), ville, cp,
+                (parts[0] if parts else adresse),
+                (m.machine_modele or ""), "", "2026-01-01", "05:00", "13:00",
             ])
             n += 1
     return n
@@ -84,7 +84,10 @@ def run_optimization_v11(missions, params=None) -> dict:
     for addr in [eng.DEPOT_ADDRESS] + df["full_adresse"].dropna().unique().tolist():
         if addr not in gcache:
             eng.geocode(addr, gcache)
-    depot = gcache[eng.DEPOT_ADDRESS]
+    depot = gcache.get(eng.DEPOT_ADDRESS)
+    if not depot:
+        # Repli : dépôt Lieusaint (Paris Sud) si le géocodage échoue
+        depot = {"lat": 48.6320, "lng": 2.4700}
     rc = eng.load_cache(eng.ROUTE_CACHE_FILE)
 
     liv = df[df["type_mission_norm"] == "livraison"].to_dict("records")
@@ -118,12 +121,12 @@ def _map_resultat(tournees, gcache, depot, min_theo, eng) -> dict:
         taux_sum += taux
 
         # Points d'itinéraire (dépôt → missions → dépôt)
-        pts = [[depot[0], depot[1]]]
+        pts = [[depot["lat"], depot["lng"]]]
         for m in livs + recs:
             c = gcache.get(m.get("full_adresse"))
             if c:
-                pts.append([c[0], c[1]])
-        pts.append([depot[0], depot[1]])
+                pts.append([c["lat"], c["lng"]])
+        pts.append([depot["lat"], depot["lng"]])
 
         litres = km * CONSO / 100
         # Plateau 2.5D : liste des machines avec leurs dimensions
