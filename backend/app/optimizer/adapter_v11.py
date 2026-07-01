@@ -90,14 +90,36 @@ def run_optimization_v11(missions, params=None) -> dict:
     import app.optimizer.tournee_optimizer_v11 as eng
 
     # Cache géocode/routes dans un VOLUME DOCKER persistant (/code/cache_data).
-    # Ce dossier survit aux rebuilds. La 1ère optimisation remplit le cache,
-    # toutes les suivantes sont quasi instantanées (routes lues, pas recalculées).
-    # NB : on NE touche PAS à la pause API (ORS_PAUSE_SEC), qui doit rester à sa
-    # valeur d'origine (1.6s) pour que les appels de routes réussissent.
     cache_dir = "/code/cache_data"
     os.makedirs(cache_dir, exist_ok=True)
     eng.GEOCODE_CACHE_FILE = os.path.join(cache_dir, "geocode_cache.json")
     eng.ROUTE_CACHE_FILE = os.path.join(cache_dir, "route_cache.json")
+
+    # ROUTAGE via OSRM local (serveur Docker interne, illimité et instantané).
+    # Remplace openrouteservice → plus de quota, plus de pause, distances réelles.
+    import requests as _rq
+    OSRM_URL = os.environ.get("OSRM_URL", "http://sta_osrm:5000")
+
+    def _osrm_route(a, b, rc=None):
+        if not a or not b:
+            return {"distance_km": None, "duration_min": None}
+        if abs(a["lat"] - b["lat"]) < 1e-6 and abs(a["lng"] - b["lng"]) < 1e-6:
+            return {"distance_km": 0.0, "duration_min": 0}
+        try:
+            url = f"{OSRM_URL}/route/v1/driving/{a['lng']},{a['lat']};{b['lng']},{b['lat']}?overview=false"
+            r = _rq.get(url, timeout=5)
+            j = r.json()
+            if j.get("code") == "Ok" and j.get("routes"):
+                rt = j["routes"][0]
+                return {"distance_km": round(rt["distance"] / 1000, 2),
+                        "duration_min": round(rt["duration"] / 60)}
+        except Exception:
+            pass
+        # repli vol d'oiseau si OSRM indisponible (la démo ne casse jamais)
+        dist_km = round(eng.vd(a, b) * 1.4, 2)
+        return {"distance_km": dist_km, "duration_min": round(dist_km / 50 * 60)}
+
+    eng.get_route = _osrm_route
 
     # 1. Écrire le CSV temporaire
     tmpdir = tempfile.mkdtemp(prefix="sta_v11_")
