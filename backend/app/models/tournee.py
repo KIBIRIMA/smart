@@ -23,3 +23,7 @@ class Tournee(Base, TimestampMixin):
     itineraire: Mapped[list] = mapped_column(JSON, default=list)
     # Explications de l'algorithme (transparence DSI)
     explications: Mapped[list] = mapped_column(JSON, default=list)
+    # Machines chargées sur le plateau (pour la vue 2.5D)
+    plateau: Mapped[list] = mapped_column(JSON, default=list)
+    # Chronologie de la tournée : liste d'étapes {heure, lieu, action, machine, duree}
+    chronologie: Mapped[list] = mapped_column(JSON, default=list)
