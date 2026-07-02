@@ -34,7 +34,7 @@ export default function TourneesPage() {
                   ))}
                 </div>
                 <Bar pct={t.taux_remplissage} />
-                {t.explications?.length > 0 && (
+                {t.explications && t.explications.length > 0 && (
                   <details style={{ marginTop: 12 }}>
                     <summary style={{ cursor: "pointer", fontSize: 12, color: C.orange, fontWeight: 600 }}>💬 Pourquoi cette tournée ?</summary>
                     <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
@@ -47,12 +47,12 @@ export default function TourneesPage() {
                     </div>
                   </details>
                 )}
-                {t.plateau?.length > 0 && (
+                {t.plateau && t.plateau.length > 0 && (
                   <div style={{ marginTop: 14 }}>
                     <Plateau25D machines={t.plateau} taux={t.taux_remplissage} tourIndex={t.id} />
                   </div>
                 )}
-                {t.chronologie?.length > 0 && (
+                {t.chronologie && t.chronologie.length > 0 && (
                   <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
                     <Chronologie etapes={t.chronologie} dureeMin={t.duree_min} />
                   </div>
