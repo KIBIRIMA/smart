@@ -230,6 +230,44 @@ def _map_resultat(tournees, gcache, depot, min_theo, eng) -> dict:
         explications.append(
             f"Camion sélectionné : {t.get('camion_label','—')} (PTAC {t.get('camion_ptac_t','?')}T).")
 
+        # ── Chronologie horaire de la tournée ──
+        # Départ 05:00, +15 min chargement/déchargement par arrêt, trajets estimés.
+        def _hhmm(minutes):
+            h = 5 * 60 + int(minutes)
+            return f"{(h // 60) % 24:02d}:{h % 60:02d}"
+        chronologie = []
+        horloge = 0  # minutes depuis 05:00
+        chronologie.append({
+            "heure": _hhmm(horloge), "lieu": "Dépôt agence Lieusaint",
+            "action": "Départ", "machine": "", "duree_min": 0,
+        })
+        prev = depot
+        seq = [("livraison", m) for m in livs] + [("recuperation", m) for m in recs]
+        for op, m in seq:
+            c = gcache.get(m.get("full_adresse")) or prev
+            route = eng.get_route(prev, c) if prev and c else {"duration_min": 20}
+            trajet = route.get("duration_min") or 20
+            horloge += trajet
+            action = "Livraison — dépose machine" if op == "livraison" else "Récupération — charge machine"
+            chronologie.append({
+                "heure": _hhmm(horloge),
+                "lieu": f"{m.get('client','')} ({m.get('ville') or m.get('full_adresse','')[:30]})",
+                "action": action,
+                "machine": m.get("machine", ""),
+                "duree_min": 15,
+            })
+            horloge += 15  # temps de manutention
+            prev = c
+        # retour dépôt
+        route = eng.get_route(prev, depot) if prev else {"duration_min": 20}
+        horloge += route.get("duration_min") or 20
+        retour_note = "Retour dépôt" + (" — dépose des récupérations" if recs else "")
+        chronologie.append({
+            "heure": _hhmm(horloge), "lieu": "Dépôt agence Lieusaint",
+            "action": retour_note, "machine": "", "duree_min": 0,
+        })
+        duree_totale = horloge
+
         out_tours.append({
             "index": t["tour_id"],
             "couleur": TC[i % len(TC)],
@@ -241,6 +279,9 @@ def _map_resultat(tournees, gcache, depot, min_theo, eng) -> dict:
             "nb_missions": len(livs) + len(recs),
             "plateau": plateau,
             "explications": explications,
+            "chronologie": chronologie,
+            "duree_min": duree_totale,
+            "depart": "05:00",
         })
 
     nb_t = len(out_tours)
