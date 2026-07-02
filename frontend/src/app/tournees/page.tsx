@@ -2,6 +2,8 @@
 import AppShell from "@/components/AppShell";
 import PageHeader from "@/components/PageHeader";
 import { Card, StatusChip, Bar, EmptyState, Skeleton } from "@/components/ui";
+import Chronologie from "@/components/Chronologie";
+import Plateau25D from "@/components/Plateau25D";
 import { useTournees } from "@/hooks/useApi";
 import { C } from "@/lib/theme";
 
@@ -44,6 +46,16 @@ export default function TourneesPage() {
                       ))}
                     </div>
                   </details>
+                )}
+                {t.plateau?.length > 0 && (
+                  <div style={{ marginTop: 14 }}>
+                    <Plateau25D machines={t.plateau} taux={t.taux_remplissage} tourIndex={t.id} />
+                  </div>
+                )}
+                {t.chronologie?.length > 0 && (
+                  <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+                    <Chronologie etapes={t.chronologie} dureeMin={t.duree_min} />
+                  </div>
                 )}
               </Card>
             ))}
