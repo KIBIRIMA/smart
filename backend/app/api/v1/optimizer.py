@@ -83,6 +83,26 @@ async def run(body: OptimizeRequest, db: DB, user: CurrentUser):
     )
     db.add(opt)
     await db.flush()
+
+    # Remplace les tournées précédentes par celles du nouveau run
+    from app.models.tournee import Tournee
+    from sqlalchemy import delete as _delete
+    await db.execute(_delete(Tournee))
+    for t in result["tournees"]:
+        db.add(Tournee(
+            optimisation_id=opt.id,
+            chauffeur_nom=t.get("chauffeur_nom", ""),
+            vehicule_immat=t.get("vehicule_immat", ""),
+            nb_missions=t["nb_missions"],
+            km=t["km"], co2_kg=t["co2_kg"], taux_remplissage=t["taux_remplissage"],
+            depart=t.get("depart", "05:00"), statut="PLANIFIEE",
+            couleur=t.get("couleur", "#E65100"),
+            itineraire=t.get("itineraire", []),
+            explications=t.get("explications", []),
+            plateau=t.get("plateau", []),
+            chronologie=t.get("chronologie", []),
+        ))
+    await db.commit()
     return result
 
 
