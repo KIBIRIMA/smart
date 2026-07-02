@@ -75,6 +75,8 @@ class TourneeOut(BaseModel):
     couleur: str
     itineraire: list
     explications: list
+    plateau: list = []
+    chronologie: list = []
     class Config: from_attributes = True
 
 
