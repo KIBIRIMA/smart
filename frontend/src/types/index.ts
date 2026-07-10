@@ -20,6 +20,9 @@ export interface OptimResultTour { index: number; couleur: string; missions: num
 export interface OptimizeResult {
   reference: string; statut: string; moteur: string;
   nb_missions: number; nb_tournees: number; nb_tournees_min_theorique: number;
+  nb_chauffeurs?: number | null;
+  chauffeurs?: { id: number; nom: string; tours: number[]; duree_min: number; duree_texte: string; km: number; charge_pct: number }[];
+  rentabilite?: { par_tournee: any[]; ca_total_eur: number; cout_total_eur: number; marge_total_eur: number; taux_marge_pct: number; tournees_deficitaires: number[] } | null;
   km_total: number; taux_moyen: number; cout_estime: number; co2_kg: number; duree_calcul_s: number;
   comparaison: ComparisonMetric[]; tournees: OptimResultTour[];
 }
