@@ -86,6 +86,55 @@ export default function OptimisationPage() {
             ))}
           </div>
 
+          {/* ENCART CHAUFFEURS-JOURNÉES (affecter_chauffeurs du moteur) */}
+          {result.nb_chauffeurs != null && result.chauffeurs && result.chauffeurs.length > 0 && (
+            <Card style={{ marginBottom: 14, borderLeft: `3px solid ${C.green}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <div>
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>👥 Affectation chauffeurs</span>
+                  <span style={{ fontSize: 12, color: C.textMid, marginLeft: 8 }}>
+                    {result.nb_tournees} tournées regroupées en{" "}
+                    <b style={{ color: C.green }}>{result.nb_chauffeurs} chauffeur{result.nb_chauffeurs > 1 ? "s" : ""}-journée{result.nb_chauffeurs > 1 ? "s" : ""}</b>
+                  </span>
+                </div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: C.green }}>{result.nb_chauffeurs}</div>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 8 }}>
+                {result.chauffeurs.map((ch: any) => (
+                  <div key={ch.id} style={{ padding: 10, background: C.navyMid, borderRadius: 8 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>{ch.nom}</div>
+                    <div style={{ fontSize: 11, color: C.textMid }}>Tournées : {ch.tours.join(" + ")}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
+                      <span style={{ fontSize: 11, color: ch.charge_pct > 95 ? C.orange : C.textMid }}>{ch.duree_texte} / 8h</span>
+                      <span style={{ fontSize: 11, color: ch.charge_pct > 95 ? C.orange : C.green, fontWeight: 700 }}>{ch.charge_pct}%</span>
+                    </div>
+                    <div style={{ height: 4, background: C.border, borderRadius: 2, marginTop: 4, overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${Math.min(100, ch.charge_pct)}%`, background: ch.charge_pct > 95 ? C.orange : C.green }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* ENCART RENTABILITÉ (calcul_rentabilite du moteur) */}
+          {result.rentabilite && (
+            <Card style={{ marginBottom: 14, borderLeft: `3px solid ${C.orange}` }}>
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 12 }}>💰 Rentabilité de la journée</div>
+              <div style={{ display: "flex", gap: 20, flexWrap: "wrap", marginBottom: 10 }}>
+                <div><div style={{ fontSize: 22, fontWeight: 800 }}>{result.rentabilite.ca_total_eur}€</div><div style={{ fontSize: 10, color: C.textMid }}>CA estimé</div></div>
+                <div><div style={{ fontSize: 22, fontWeight: 800, color: C.textMid }}>{result.rentabilite.cout_total_eur}€</div><div style={{ fontSize: 10, color: C.textMid }}>Coût total</div></div>
+                <div><div style={{ fontSize: 22, fontWeight: 800, color: C.green }}>{result.rentabilite.marge_total_eur}€</div><div style={{ fontSize: 10, color: C.textMid }}>Marge</div></div>
+                <div><div style={{ fontSize: 22, fontWeight: 800, color: C.green }}>{result.rentabilite.taux_marge_pct}%</div><div style={{ fontSize: 10, color: C.textMid }}>Taux de marge</div></div>
+              </div>
+              {result.rentabilite.tournees_deficitaires && result.rentabilite.tournees_deficitaires.length > 0 && (
+                <div style={{ fontSize: 12, color: C.red, padding: 8, background: `${C.red}15`, borderRadius: 6 }}>
+                  ⚠ Tournée(s) déficitaire(s) : {result.rentabilite.tournees_deficitaires.join(", ")} — à mutualiser ou sous-traiter
+                </div>
+              )}
+            </Card>
+          )}
+
           <div style={{ display: "flex", gap: 3, background: C.bgCard, padding: 5, borderRadius: 9, border: `1px solid ${C.border}`, width: "fit-content", marginBottom: 14 }}>
             {[["compare", "🔄 Avant / Après"], ["tours", "🚛 Tournées"], ["why", "💬 Pourquoi ces tournées ?"]].map(([id, l]) => (
               <button key={id} onClick={() => setTab(id as any)} style={{
