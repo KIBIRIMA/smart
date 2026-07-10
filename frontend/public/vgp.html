@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Registre VGP — Smart Transport AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #060F1E; color: #F1F5F9; font-size: 13px; }
+  header { background: #0B1A2E; border-bottom: 2px solid #E65100; padding: 12px 18px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 16px; } header .sub { color: #94A3B8; font-size: 11px; margin-left: 6px; }
+  .wrap { max-width: 1080px; margin: 16px auto; padding: 0 14px; }
+  .panel { background: #0B1A2E; border: 1px solid #1E2F5A; border-radius: 10px; margin-bottom: 14px; }
+  .panel h2 { font-size: 12px; padding: 10px 14px; border-bottom: 1px solid #1E2F5A; color: #FF7043; text-transform: uppercase; letter-spacing: .6px; }
+  .panel .body { padding: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 7px 9px; color: #94A3B8; border-bottom: 1px solid #1E2F5A; font-weight: 600; }
+  td { padding: 7px 9px; border-bottom: 1px solid #12233F; }
+  .st { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; }
+  .st.OK { background: #14532D; color: #86EFAC; }
+  .st.BIENTOT { background: #713F12; color: #FDE68A; }
+  .st.EXPIREE { background: #7F1D1D; color: #FCA5A5; }
+  .st.INCONNUE { background: #1E2F5A; color: #94A3B8; }
+  input, button { font: inherit; border-radius: 7px; }
+  input { background: #060F1E; border: 1px solid #1E2F5A; color: #F1F5F9; padding: 8px; }
+  button { cursor: pointer; border: none; padding: 8px 13px; font-weight: 700; }
+  .bp { background: #E65100; color: #fff; }
+  .bs { background: transparent; color: #94A3B8; border: 1px solid #1E2F5A; }
+  .bs.small { font-size: 11px; padding: 5px 9px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  label { font-size: 11px; color: #94A3B8; display: block; margin-bottom: 3px; }
+  #qrmodal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); align-items: center; justify-content: center; }
+  #qrbox { background: #fff; color: #0F172A; border-radius: 12px; padding: 26px; text-align: center; }
+  #qrbox .parc { font-size: 20px; font-weight: 900; margin-top: 12px; }
+  #qrbox .mod { color: #475569; font-size: 13px; }
+  #qrbox .hint { color: #64748B; font-size: 10px; margin-top: 10px; max-width: 240px; }
+  #qrdiv { display: flex; justify-content: center; }
+  .file-mini { font-size: 10px; }
+  @media print {
+    body * { visibility: hidden; }
+    #qrmodal, #qrmodal * { visibility: visible; }
+    #qrmodal { position: absolute; background: #fff; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🛡 Registre VGP</h1>
+  <span class="sub">Vérifications Générales Périodiques — QR code par machine • Smart Transport AI</span>
+  <span style="margin-left:auto"><a href="/" style="color:#94A3B8;font-size:11px">← Retour à l'application</a></span>
+</header>
+
+<div class="wrap">
+  <div class="panel" style="border-color:#E65100">
+    <h2>📥 Déposer les rapports VGP des inspecteurs (lecture automatique)</h2>
+    <div class="body">
+      <div id="drop" style="border:2px dashed #1E2F5A;border-radius:10px;padding:26px;text-align:center;cursor:pointer;color:#94A3B8">
+        Glissez ici les PDF reçus (plusieurs à la fois) ou cliquez pour choisir<br>
+        <span style="font-size:11px">→ le logiciel lit chaque rapport, détecte le n° de parc, insère la date, la série et les observations — sans saisie.</span>
+        <input type="file" id="pdfs" accept=".pdf" multiple style="display:none">
+      </div>
+      <div id="recap" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Saisie manuelle (secours)</h2>
+    <div class="body">
+      <div class="row">
+        <div><label>N° de parc</label><input id="f-parc" placeholder="ex. 12336" style="width:110px"></div>
+        <div><label>Modèle</label><input id="f-mod" placeholder="ex. ZEBRA 12" style="width:170px"></div>
+        <div><label>Date de la dernière VGP</label><input id="f-date" type="date"></div>
+        <button class="bp" onclick="upsert()">💾 Enregistrer</button>
+      </div>
+      <div style="color:#64748B;font-size:11px;margin-top:8px">
+        Validité réglementaire : 6 mois (PEMP). Le statut passe en ⚠ « bientôt » à 30 jours de l'échéance.
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Machines au registre <span id="n" style="color:#94A3B8"></span></h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Parc</th><th>Modèle</th><th>Dernière VGP</th><th>Échéance</th><th>Statut</th><th>Rapport VGP</th><th>Notice</th><th>QR</th></tr></thead>
+        <tbody id="tb"><tr><td colspan="8" style="color:#64748B;padding:16px;text-align:center">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="qrmodal" onclick="this.style.display='none'">
+  <div id="qrbox" onclick="event.stopPropagation()">
+    <div id="qrdiv"></div>
+    <div class="parc" id="qr-parc"></div>
+    <div class="mod" id="qr-mod"></div>
+    <div class="hint">Scannez pour consulter la VGP et la notice d'utilisation de cette machine.</div>
+    <div style="margin-top:14px; display:flex; gap:8px; justify-content:center">
+      <button class="bp" onclick="window.print()">🖨 Imprimer l'étiquette</button>
+      <button class="bs" onclick="document.getElementById('qrmodal').style.display='none'">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="anmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:10">
+  <div style="background:#0B1A2E;border:1px solid #1E2F5A;border-radius:12px;padding:22px;max-width:480px;width:92%" onclick="event.stopPropagation()">
+    <div style="font-weight:800;font-size:14px;margin-bottom:12px">🔎 Analyse du rapport VGP</div>
+    <div id="an-body" style="font-size:12px;line-height:1.7"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="bp" id="an-apply" style="flex:1">✔ Appliquer au registre</button>
+      <button class="bs" onclick="document.getElementById('anmodal').style.display='none'">Ignorer</button>
+    </div>
+    <div style="color:#64748B;font-size:10px;margin-top:8px">Lecture automatique du PDF (formats variables selon l'organisme) — vérifiez avant d'appliquer.</div>
+  </div>
+</div>
+
+<script>
+const API = "/api/v1";
+let TOKEN = null;
+
+async function login() {
+  const r = await fetch(API + "/auth/login", { method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "username=heinrich.weber%40acces-industrie.fr&password=exploit123" });
+  TOKEN = (await r.json()).access_token;
+}
+
+async function charger() {
+  const r = await fetch(API + "/vgp/machines", { headers: { Authorization: "Bearer " + TOKEN } });
+  const rows = await r.json();
+  const tb = document.getElementById("tb");
+  document.getElementById("n").textContent = "— " + rows.length + " machine(s)";
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" style="color:#64748B;padding:16px;text-align:center">Aucune machine déclarée — utilisez le formulaire ci-dessus</td></tr>'; return; }
+  tb.innerHTML = rows.map(m => `<tr>
+    <td><b>${m.parc}</b></td><td>${m.machine_modele || "—"}</td>
+    <td>${m.date_vgp || "—"}</td><td>${m.echeance || "—"}${m.jours_restants != null ? ` <span style="color:#64748B">(${m.jours_restants}j)</span>` : ""}</td>
+    <td><span class="st ${m.statut}">${m.statut === "BIENTOT" ? "⚠ BIENTÔT" : m.statut}</span></td>
+    <td class="file-mini">${m.a_fichier_vgp ? `<a href="${API}/vgp/public/${m.parc}/document/vgp" target="_blank" style="color:#86EFAC">📄 voir</a> · ` : ""}<label style="display:inline;color:#94A3B8;cursor:pointer">📤<input type="file" accept=".pdf" style="display:none" onchange="uploader('${m.parc}','vgp',this)"></label></td>
+    <td class="file-mini">${m.a_fichier_notice ? `<a href="${API}/vgp/public/${m.parc}/document/notice" target="_blank" style="color:#86EFAC">📄 voir</a> · ` : ""}<label style="display:inline;color:#94A3B8;cursor:pointer">📤<input type="file" accept=".pdf" style="display:none" onchange="uploader('${m.parc}','notice',this)"></label></td>
+    <td><button class="bs small" onclick="qr('${m.parc}','${(m.machine_modele || "").replace(/'/g, "")}')">QR</button></td>
+  </tr>`).join("");
+}
+
+async function upsert() {
+  const fd = new URLSearchParams();
+  fd.append("parc", document.getElementById("f-parc").value);
+  fd.append("machine_modele", document.getElementById("f-mod").value);
+  fd.append("date_vgp", document.getElementById("f-date").value);
+  const r = await fetch(API + "/vgp/machines", { method: "POST",
+    headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/x-www-form-urlencoded" },
+    body: fd });
+  if (r.ok) { document.getElementById("f-parc").value = ""; charger(); }
+  else alert("Erreur : " + (await r.text()));
+}
+
+async function uploader(parc, type, input) {
+  const f = input.files[0]; if (!f) return;
+  const fd = new FormData(); fd.append("file", f);
+  const r = await fetch(`${API}/vgp/machines/${parc}/document?type=${type}`, {
+    method: "POST", headers: { Authorization: "Bearer " + TOKEN }, body: fd });
+  if (!r.ok) { alert("Upload impossible"); return; }
+  const j = await r.json();
+  charger();
+  if (type === "vgp" && j.analyse) montrerAnalyse(parc, j.analyse);
+}
+
+function montrerAnalyse(parc, a) {
+  const b = document.getElementById("an-body");
+  if (!a.lecture_ok) { b.innerHTML = `<span style="color:#FCA5A5">${a.erreur}</span>`; }
+  else {
+    const conf = a.parc_conforme
+      ? '<span style="color:#86EFAC;font-weight:800">✅ n° de parc CONFORME (' + a.parc_attendu + ' trouvé dans le PDF)</span>'
+      : '<span style="color:#FCA5A5;font-weight:800">⚠ n° de parc NON RETROUVÉ dans le PDF' + (a.parc_detecte ? " — parc détecté : " + a.parc_detecte : "") + '</span>';
+    b.innerHTML =
+      conf + "<br>" +
+      "📅 Date de vérification détectée : <b>" + (a.date_detectee || "— non détectée") + "</b><br>" +
+      "🔢 N° de série détecté : <b>" + (a.serie_detectee || "—") + "</b><br>" +
+      "📝 Observations : <i>" + (a.observations || "aucune détectée") + "</i>" +
+      (a.avertissements && a.avertissements.length ? '<div style="color:#FDE68A;margin-top:8px">' + a.avertissements.join("<br>") + "</div>" : "");
+  }
+  const btn = document.getElementById("an-apply");
+  btn.disabled = !a.lecture_ok || (!a.date_detectee && !a.serie_detectee && !a.observations);
+  btn.onclick = async () => {
+    const fd = new URLSearchParams();
+    fd.append("parc", parc);
+    if (a.date_detectee) fd.append("date_vgp", a.date_detectee);
+    if (a.serie_detectee) fd.append("numero_serie", a.serie_detectee);
+    if (a.observations) fd.append("observations", a.observations);
+    await fetch(API + "/vgp/machines", { method: "POST",
+      headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+    document.getElementById("anmodal").style.display = "none";
+    charger();
+  };
+  document.getElementById("anmodal").style.display = "flex";
+}
+
+function qr(parc, mod) {
+  document.getElementById("qrdiv").innerHTML = "";
+  new QRCode(document.getElementById("qrdiv"), {
+    text: location.origin + "/machine.html?parc=" + encodeURIComponent(parc),
+    width: 190, height: 190 });
+  document.getElementById("qr-parc").textContent = "PARC " + parc;
+  document.getElementById("qr-mod").textContent = mod;
+  document.getElementById("qrmodal").style.display = "flex";
+}
+
+// ── Dépôt en masse : lecture automatique des PDF ──
+const drop = document.getElementById("drop");
+const pdfs = document.getElementById("pdfs");
+drop.addEventListener("click", () => pdfs.click());
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.style.borderColor = "#E65100"; });
+drop.addEventListener("dragleave", () => drop.style.borderColor = "#1E2F5A");
+drop.addEventListener("drop", (e) => { e.preventDefault(); drop.style.borderColor = "#1E2F5A"; importer(e.dataTransfer.files); });
+pdfs.addEventListener("change", () => importer(pdfs.files));
+
+async function importer(fileList) {
+  const files = [...fileList].filter(f => f.name.toLowerCase().endsWith(".pdf"));
+  if (!files.length) return;
+  const rc = document.getElementById("recap");
+  rc.innerHTML = `<div style="color:#94A3B8">⏳ Lecture de ${files.length} PDF…</div>`;
+  const fd = new FormData();
+  files.forEach(f => fd.append("files", f));
+  const r = await fetch(API + "/vgp/import-pdfs", { method: "POST",
+    headers: { Authorization: "Bearer " + TOKEN }, body: fd });
+  if (!r.ok) { rc.innerHTML = '<div style="color:#FCA5A5">Erreur d\'import</div>'; return; }
+  const j = await r.json();
+  rc.innerHTML =
+    `<div style="font-weight:800;margin-bottom:8px">✅ ${j.inserees}/${j.total} rapport(s) insérés automatiquement` +
+    (j.a_verifier ? ` — <span style="color:#FDE68A">⚠ ${j.a_verifier} à vérifier</span>` : "") + `</div>` +
+    `<table><thead><tr><th>Fichier</th><th>Parc</th><th>Date VGP</th><th>Série</th><th>Statut</th></tr></thead><tbody>` +
+    j.details.map(d => d.statut === "INSEREE"
+      ? `<tr><td>${d.fichier}</td><td><b>${d.parc}</b></td><td>${d.date || "—"}</td><td>${d.serie || "—"}</td><td><span class="st OK">insérée</span></td></tr>`
+      : `<tr><td>${d.fichier}</td><td colspan="2" style="color:#FDE68A">${d.detail}</td>
+           <td><input placeholder="parc ?" style="width:80px" id="fix-${d.fichier.replace(/[^a-z0-9]/gi,'')}"></td>
+           <td><span class="st BIENTOT">à vérifier</span></td></tr>`).join("") +
+    `</tbody></table>` +
+    `<div style="color:#64748B;font-size:10px;margin-top:6px">Cas « à vérifier » : le parc n'apparaît pas dans le PDF — saisir le parc puis re-déposer le fichier via 📤 sur la ligne machine.</div>`;
+  charger();
+}
+
+(async () => { await login(); await charger(); })();
+</script>
+</body>
+</html>
