@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>GestiLoc ERP — Simulateur d'intégration</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: #EDF1F5; color: #1F2937; font-size: 13px; }
+  header { background: linear-gradient(#3B6EA5, #2C5586); color: #fff; padding: 10px 18px; display: flex; align-items: center; gap: 14px; }
+  header h1 { font-size: 16px; font-weight: 600; }
+  .badge-sim { background: #F59E0B; color: #7C2D12; font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 4px; letter-spacing: .8px; }
+  .conn { margin-left: auto; font-size: 11px; opacity: .9; }
+  nav { background: #fff; border-bottom: 2px solid #D3DCE6; padding: 0 18px; display: flex; gap: 2px; }
+  nav button { border: none; background: none; padding: 10px 16px; font: inherit; font-weight: 600; color: #64748B; cursor: pointer; border-bottom: 3px solid transparent; }
+  nav button.on { color: #2C5586; border-bottom-color: #2C5586; }
+  .wrap { max-width: 1180px; margin: 14px auto; padding: 0 14px; display: grid; grid-template-columns: 1fr 340px; gap: 14px; }
+  .panel { background: #fff; border: 1px solid #D3DCE6; border-radius: 6px; margin-bottom: 14px; }
+  .panel h2 { font-size: 12px; background: #F4F7FA; border-bottom: 1px solid #D3DCE6; padding: 8px 12px; color: #2C5586; text-transform: uppercase; letter-spacing: .5px; display:flex; }
+  .panel .body { padding: 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #F4F7FA; border-bottom: 2px solid #D3DCE6; text-align: left; padding: 6px 8px; color: #2C5586; font-weight: 600; white-space: nowrap; }
+  td { border-bottom: 1px solid #E8EDF3; padding: 5px 8px; }
+  tr:nth-child(even) td { background: #FAFCFE; }
+  tr.sync td { background: #E9F7EF !important; }
+  .tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 700; white-space: nowrap; }
+  .tag.liv { background: #DBEAFE; color: #1D4ED8; }
+  .tag.rec { background: #EDE9FE; color: #6D28D9; }
+  .tag.trf { background: #FEF3C7; color: #92400E; }
+  .tag.ok  { background: #DCFCE7; color: #166534; }
+  .tag.nat { background: #FEE2E2; color: #991B1B; }
+  .tag.int { background: #DCFCE7; color: #166534; cursor: pointer; border: 1px dashed #166534; }
+  button { font: inherit; cursor: pointer; border-radius: 5px; border: 1px solid #2C5586; padding: 8px 14px; font-weight: 600; }
+  .btn-p { background: #2C5586; color: #fff; }
+  .btn-s { background: #fff; color: #2C5586; }
+  .btn-go { background: #15803D; border-color: #15803D; color: #fff; width: 100%; padding: 11px; font-size: 14px; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  label { font-size: 11px; color: #475569; }
+  input, select { padding: 6px; border: 1px solid #CBD5E1; border-radius: 4px; font: inherit; font-size: 12px; }
+  input[type=number] { width: 60px; }
+  #log { background: #0F172A; color: #A7F3D0; font-family: Consolas, monospace; font-size: 11px; padding: 10px; border-radius: 5px; height: 150px; overflow-y: auto; white-space: pre-wrap; }
+  .kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi div { background: #F4F7FA; border: 1px solid #D3DCE6; border-radius: 5px; padding: 8px; text-align: center; }
+  .kpi b { display: block; font-size: 19px; color: #2C5586; }
+  .kpi span { font-size: 10px; color: #64748B; }
+  .warn { background: #FEF2F2; border: 1px solid #FCA5A5; color: #B91C1C; padding: 8px; border-radius: 5px; font-size: 12px; margin-top: 8px; }
+  .info { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; padding: 8px; border-radius: 5px; font-size: 11px; margin-bottom: 10px; }
+  .foot { text-align: center; color: #94A3B8; font-size: 10px; padding: 12px; }
+  .count { font-size: 11px; color: #64748B; margin-left: auto; }
+  .tab { display: none; } .tab.on { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🗂 GestiLoc — Gestion des locations</h1>
+  <span class="badge-sim">SIMULATEUR ERP — DÉMONSTRATION D'INTÉGRATION</span>
+  <span class="conn" id="conn">● non connecté</span>
+</header>
+<nav>
+  <button class="on" onclick="tab('missions',this)">📋 Missions</button>
+  <button onclick="tab('transferts',this)">🔁 Transferts inter-chantiers</button>
+  <button onclick="tab('bc',this)">🧾 Bons de commande transport</button>
+</nav>
+
+<div class="wrap">
+  <div><!-- colonne gauche : onglets -->
+
+    <!-- ═══ ONGLET MISSIONS ═══ -->
+    <div class="tab on" id="tab-missions">
+      <div class="panel">
+        <h2>Lignes de transport à synchroniser <span class="count" id="count"></span></h2>
+        <div class="body">
+          <div class="row">
+            <input type="file" id="csv" accept=".csv">
+            <button class="btn-s" onclick="genererDemo()">Générer un carnet démo (40)</button>
+          </div>
+          <div style="max-height: 400px; overflow-y: auto;">
+            <table>
+              <thead><tr><th>#</th><th>Client / chantier</th><th>Ville</th><th>CP</th><th>Type</th><th>Machine</th><th>Parc</th><th></th></tr></thead>
+              <tbody id="tbody"><tr><td colspan="8" style="color:#94A3B8;padding:18px;text-align:center">Chargez un CSV, générez un carnet démo, ou créez des transferts / basculez des BC</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ONGLET TRANSFERTS ═══ -->
+    <div class="tab" id="tab-transferts">
+      <div class="panel">
+        <h2>Créer un transfert inter-chantiers</h2>
+        <div class="body">
+          <div class="info">Comme dans le logiciel des assistantes : la machine part d'un <b>chantier</b> vers un <b>autre chantier</b>.
+          À la synchronisation, le transfert est décomposé en <b>2 missions liées</b> (récupération au départ + livraison à l'arrivée)
+          que le moteur peut mutualiser dans ses tournées.</div>
+          <div class="row">
+            <label>N° de parc<br><select id="t-parc"></select></label>
+            <label>Chantier de départ<br><input id="t-dep" placeholder="Ville départ" list="villes" style="width:150px"></label>
+            <label>CP départ<br><input id="t-depcp" placeholder="94xxx" style="width:70px"></label>
+            <label>→ Chantier d'arrivée<br><input id="t-arr" placeholder="Ville arrivée" list="villes" style="width:150px"></label>
+            <label>CP arrivée<br><input id="t-arrcp" placeholder="94xxx" style="width:70px"></label>
+          </div>
+          <datalist id="villes"><option>ORLY</option><option>RUNGIS</option><option>CRETEIL</option><option>VITRY-SUR-SEINE</option><option>IVRY-SUR-SEINE</option><option>MASSY</option><option>CHILLY-MAZARIN</option><option>THIAIS</option><option>TRAPPES</option><option>MELUN</option></datalist>
+          <button class="btn-p" onclick="ajouterTransfert()">➕ Ajouter le transfert</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Transferts en attente <span class="count" id="t-count"></span></h2>
+        <div class="body">
+          <table>
+            <thead><tr><th>Parc</th><th>Machine</th><th>Départ</th><th>Arrivée</th><th>Statut</th></tr></thead>
+            <tbody id="t-tbody"><tr><td colspan="5" style="color:#94A3B8;padding:14px;text-align:center">Aucun transfert créé</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ONGLET BONS DE COMMANDE ═══ -->
+    <div class="tab" id="tab-bc">
+      <div class="panel">
+        <h2>Bons de commande transport (sous-traitance)</h2>
+        <div class="body">
+          <div class="info">Données issues de <b>BC réels anonymisés</b> (audit du 09/07). Les BC <b>franciliens courts</b> sont marqués
+          <span class="tag int">🟢 internalisable</span> : un clic les bascule en missions internes dans le carnet —
+          c'est la démonstration du gisement d'économie sur la sous-traitance.</div>
+          <table>
+            <thead><tr><th>N° BC</th><th>Prestataire</th><th>Trajet</th><th>Machines</th><th>Montant HT</th><th>Statut</th><th>Analyse</th></tr></thead>
+            <tbody id="bc-tbody"></tbody>
+          </table>
+          <div id="bc-eco" style="margin-top:10px; font-weight:700; color:#166534;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- colonne droite : synchro + rapport -->
+  <div>
+    <div class="panel">
+      <h2>Synchronisation → Smart Transport AI</h2>
+      <div class="body">
+        <div class="row">
+          <label>Vagues <input type="number" id="vagues" value="2" min="1" max="10"></label>
+          <label>Pause (s) <input type="number" id="pause" value="1" min="0" max="10"></label>
+        </div>
+        <button class="btn-p" id="btnSync" style="width:100%" onclick="synchroniser()" disabled>📤 Synchroniser les missions</button>
+        <div style="height:8px"></div>
+        <button class="btn-go" id="btnOpt" onclick="optimiser()" disabled>⚙️ Déclencher l'optimisation</button>
+        <div style="height:10px"></div>
+        <div id="log">— journal de synchronisation —</div>
+      </div>
+    </div>
+    <div class="panel" id="rapport" style="display:none">
+      <h2>Rapport d'optimisation</h2>
+      <div class="body">
+        <div class="kpi" id="kpis"></div>
+        <div id="alerte"></div>
+        <div style="height:10px"></div>
+        <a href="/optimisation" target="_blank"><button class="btn-s" style="width:100%">Ouvrir dans Smart Transport AI ↗</button></a>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="foot">Simulateur pédagogique — utilise l'API réelle de Smart Transport AI (/api/v1). Aucune donnée ERP réelle n'est connectée.</div>
+
+<script>
+const API = "/api/v1";
+let TOKEN = null, MISSIONS = [], TRANSFERTS = [];
+
+// Parc machines fictif (n° de parc réalistes comme sur les feuilles de tournée)
+const PARC = [
+  ["12336","ZEBRA 12"],["28715","HA 16 RTJ PRO"],["30479","CX 15 ST5"],["17420","H 15 SX"],
+  ["12860","S 3010 P"],["15481","RX20-18"],["7587","3246 ES"],["22985","S 3219 E"],
+  ["33173","S 4732 E"],["19128","GS 2632"],["21461","TOUCAN 10E"],["13771","MRT 2150"],
+  ["18226","A 38 E"],["21113","HA20RTJ"],["13426","MT 1440 EASY"],
+];
+// BC réels anonymisés (issus de l'audit) — CP pour la règle "internalisable"
+const BCS = [
+  { num:"PAS270534", prest:"HELP SERVICE", trajet:"Senlis (60) → Massy (91)", cps:["60300","91300"], nb:1, ht:220, statut:"Validé" },
+  { num:"PAN270475", prest:"HELP SERVICE", trajet:"St-Ouen-l'Aumône (95) → Persan (95) / Chilly (91)", cps:["95310","95340","91380"], nb:5, ht:700, statut:"Validé" },
+  { num:"PAS270471", prest:"TRANS EXPRESS", trajet:"IDF (77/78/91) + Bretagne (22/28/29)", cps:["77300","22156"], nb:6, ht:600, statut:"Validé" },
+  { num:"PAS270470", prest:"TRANS EXPRESS", trajet:"Lieusaint → Marseille (13) / Bordeaux (33)", cps:["13426","33173"], nb:8, ht:600, statut:"Validé" },
+  { num:"PAE270318", prest:"HELP SERVICE", trajet:"Lieusaint → Aude (11) / Cantal (15)", cps:["11000","15000"], nb:4, ht:700, statut:"Validé" },
+  { num:"PAS270307", prest:"SUD FRET",     trajet:"Lieusaint → Aveyron (12) / Bretagne (22)", cps:["12000","22000"], nb:3, ht:600, statut:"Validé" },
+];
+const IDF = ["75","77","78","91","92","93","94","95","60"];
+const villeCP = { "ORLY":"94310","RUNGIS":"94150","CRETEIL":"94000","VITRY-SUR-SEINE":"94400","IVRY-SUR-SEINE":"94200","MASSY":"91300","CHILLY-MAZARIN":"91380","THIAIS":"94320","TRAPPES":"78190","MELUN":"77000" };
+
+const log = (m) => { const el = document.getElementById("log"); el.textContent += "\n" + m; el.scrollTop = el.scrollHeight; };
+const tab = (id, btn) => {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("on"));
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("on"));
+  document.getElementById("tab-" + id).classList.add("on"); btn.classList.add("on");
+};
+
+async function login() {
+  try {
+    const r = await fetch(API + "/auth/login", { method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "username=heinrich.weber%40acces-industrie.fr&password=exploit123" });
+    TOKEN = (await r.json()).access_token;
+    const c = document.getElementById("conn");
+    c.textContent = "● connecté (compte de service ERP)"; c.style.color = "#86EFAC";
+    log("[ERP] Authentifié auprès de Smart Transport AI.");
+    majBoutons();
+  } catch (e) { log("[ERP] ⚠ connexion API impossible : " + e.message); }
+}
+
+function majBoutons() { document.getElementById("btnSync").disabled = MISSIONS.length === 0 || !TOKEN; }
+
+function afficher() {
+  const tb = document.getElementById("tbody");
+  if (!MISSIONS.length) { tb.innerHTML = '<tr><td colspan="8" style="color:#94A3B8;padding:18px;text-align:center">Aucune mission</td></tr>'; }
+  else tb.innerHTML = MISSIONS.map((m, i) =>
+    `<tr id="r${i}"><td>${i+1}</td><td>${m.client}</td><td>${m.ville}</td><td>${m.cp}</td>` +
+    `<td><span class="tag ${m.transfert ? "trf" : (m.type==="livraison"?"liv":"rec")}">${m.transfert ? "Transfert" : (m.type==="livraison"?"Liv.":"Récup.")}</span></td>` +
+    `<td>${m.machine}</td><td>${m.parc || ""}</td><td id="s${i}"></td></tr>`).join("");
+  document.getElementById("count").textContent = MISSIONS.length + " ligne(s)";
+  majBoutons();
+}
+
+function genererDemo() {
+  const villes = Object.entries(villeCP).filter(([v]) => v !== "TRAPPES" && v !== "MELUN");
+  MISSIONS = [];
+  for (let i = 0; i < 40; i++) {
+    const [v, cp] = villes[Math.floor(Math.random()*villes.length)];
+    const [parc, machine] = PARC[Math.floor(Math.random()*PARC.length)];
+    MISSIONS.push({ client: "Chantier " + v.split("-")[0] + " " + (i+1), ville: v, cp,
+      adresse: "Rue de la Republique " + (1+Math.floor(Math.random()*80)),
+      type: Math.random() < 0.62 ? "livraison" : "recuperation", machine, parc });
+  }
+  afficher(); log("[ERP] Carnet démo généré : 40 missions.");
+}
+
+document.getElementById("csv").addEventListener("change", (ev) => {
+  const f = ev.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    const lignes = rd.result.split(/\r?\n/).filter(l => l.trim());
+    const head = lignes[0].split(",").map(h => h.trim().toLowerCase());
+    const ix = (n) => head.indexOf(n);
+    MISSIONS = lignes.slice(1).map(l => { const c = l.split(",");
+      return { client: c[ix("client")] || "", ville: c[ix("ville")] || "",
+        cp: c[ix("code_postal")] || "", adresse: c[ix("adresse")] || "",
+        type: (c[ix("type_op")] !== undefined && c[ix("type_op")] >= "" ? c[ix("type_op")] : (c[ix("type_mission")] || "livraison")).trim() || "livraison",
+        machine: c[ix("machine")] || "" };
+    }).filter(m => m.client || m.ville);
+    afficher(); log(`[ERP] CSV chargé : ${MISSIONS.length} missions.`);
+  };
+  rd.readAsText(f);
+});
+
+// ── TRANSFERTS INTER-CHANTIERS ──
+function initParc() {
+  document.getElementById("t-parc").innerHTML =
+    PARC.map(([p, m]) => `<option value="${p}">${p} — ${m}</option>`).join("");
+  const dep = document.getElementById("t-dep"), arr = document.getElementById("t-arr");
+  dep.addEventListener("input", () => { const cp = villeCP[dep.value.toUpperCase()]; if (cp) document.getElementById("t-depcp").value = cp; });
+  arr.addEventListener("input", () => { const cp = villeCP[arr.value.toUpperCase()]; if (cp) document.getElementById("t-arrcp").value = cp; });
+}
+function ajouterTransfert() {
+  const parc = document.getElementById("t-parc").value;
+  const machine = (PARC.find(([p]) => p === parc) || ["",""])[1];
+  const dep = document.getElementById("t-dep").value.trim().toUpperCase();
+  const arr = document.getElementById("t-arr").value.trim().toUpperCase();
+  const depcp = document.getElementById("t-depcp").value.trim();
+  const arrcp = document.getElementById("t-arrcp").value.trim();
+  if (!dep || !arr || !depcp || !arrcp) { alert("Renseigner départ, arrivée et codes postaux."); return; }
+  TRANSFERTS.push({ parc, machine, dep, depcp, arr, arrcp });
+  // Décomposition : récup au chantier de départ + livraison au chantier d'arrivée
+  MISSIONS.push({ client: `TRANSFERT parc ${parc} (1/2 départ)`, ville: dep, cp: depcp,
+    adresse: "Chantier " + dep, type: "recuperation", machine, parc, transfert: true });
+  MISSIONS.push({ client: `TRANSFERT parc ${parc} (2/2 arrivée)`, ville: arr, cp: arrcp,
+    adresse: "Chantier " + arr, type: "livraison", machine, parc, transfert: true });
+  majTransferts(); afficher();
+  log(`[ERP] Transfert parc ${parc} : ${dep} → ${arr} (décomposé en 2 missions liées).`);
+}
+function majTransferts() {
+  const tb = document.getElementById("t-tbody");
+  tb.innerHTML = TRANSFERTS.length ? TRANSFERTS.map(t =>
+    `<tr><td>${t.parc}</td><td>${t.machine}</td><td>${t.dep} (${t.depcp})</td><td>${t.arr} (${t.arrcp})</td>` +
+    `<td><span class="tag trf">→ 2 missions au carnet</span></td></tr>`).join("")
+    : '<tr><td colspan="5" style="color:#94A3B8;padding:14px;text-align:center">Aucun transfert créé</td></tr>';
+  document.getElementById("t-count").textContent = TRANSFERTS.length + " transfert(s)";
+}
+
+// ── BONS DE COMMANDE ──
+let ECO = 0;
+function majBC() {
+  document.getElementById("bc-tbody").innerHTML = BCS.map((b, i) => {
+    const idf = b.cps.every(cp => IDF.includes(cp.slice(0, 2)));
+    const analyse = b.basc ? '<span class="tag ok">✔ basculé en interne</span>'
+      : idf ? `<span class="tag int" onclick="basculer(${i})">🟢 internalisable — basculer</span>`
+            : '<span class="tag nat">🔴 national (sous-traitance justifiée)</span>';
+    return `<tr><td><b>${b.num}</b></td><td>${b.prest}</td><td>${b.trajet}</td><td>${b.nb}</td>` +
+           `<td><b>${b.ht} €</b></td><td><span class="tag ok">${b.statut}</span></td><td>${analyse}</td></tr>`;
+  }).join("");
+  document.getElementById("bc-eco").textContent =
+    ECO > 0 ? `💰 Économie potentielle identifiée : ${ECO} € HT de sous-traitance basculée en interne (à recalculer via l'optimisation).` : "";
+}
+function basculer(i) {
+  const b = BCS[i]; if (b.basc) return;
+  b.basc = true; ECO += b.ht;
+  // Le BC devient des missions internes (démo : 1 récup + livraisons dans les villes du trajet)
+  b.cps.forEach((cp, k) => {
+    MISSIONS.push({ client: `Ex-BC ${b.num} (${k+1}/${b.cps.length})`, ville: "—", cp,
+      adresse: "Chantier ex-BC", type: k === 0 ? "recuperation" : "livraison",
+      machine: "A 38 E", parc: "" });
+  });
+  majBC(); afficher();
+  log(`[ERP] BC ${b.num} (${b.ht}€ HT) basculé en interne → missions ajoutées au carnet.`);
+}
+
+function toCsv(lot) {
+  const esc = (s) => String(s ?? "").replace(/,/g, " ");
+  return "client,ville,code_postal,adresse,type_op,machine\n" +
+    lot.map(m => [m.client, m.ville, m.cp, m.adresse, m.type, m.machine].map(esc).join(",")).join("\n");
+}
+async function synchroniser() {
+  const nV = Math.max(1, +document.getElementById("vagues").value || 1);
+  const pause = Math.max(0, +document.getElementById("pause").value || 0);
+  const taille = Math.ceil(MISSIONS.length / nV);
+  document.getElementById("btnSync").disabled = true;
+  log(`[ERP] Synchronisation : ${MISSIONS.length} missions en ${nV} vague(s)…`);
+  for (let v = 0; v < nV; v++) {
+    const lot = MISSIONS.slice(v * taille, (v + 1) * taille);
+    if (!lot.length) break;
+    const fd = new FormData();
+    fd.append("file", new Blob([toCsv(lot)], { type: "text/csv" }), `erp_sync_${v+1}.csv`);
+    const t0 = performance.now();
+    const r = await fetch(`${API}/import/missions?remplacer=${v === 0}`, {
+      method: "POST", headers: { Authorization: "Bearer " + TOKEN }, body: fd });
+    const j = await r.json().catch(() => ({}));
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    lot.forEach((_, k) => { const idx = v * taille + k;
+      const row = document.getElementById("r" + idx); if (row) row.classList.add("sync");
+      const st = document.getElementById("s" + idx); if (st) st.textContent = "✔"; });
+    log(`      vague ${v+1}/${nV} : ${lot.length} poussées (${j.importees ?? j.imported ?? "?"} importées) en ${dt}s`);
+    if (v < nV - 1 && pause) await new Promise(res => setTimeout(res, pause * 1000));
+  }
+  log("[ERP] Synchronisation terminée.");
+  document.getElementById("btnOpt").disabled = false;
+}
+async function optimiser() {
+  document.getElementById("btnOpt").disabled = true;
+  log("[ERP] Déclenchement de l'optimisation… (laisser finir)");
+  const t0 = performance.now();
+  try {
+    const r = await fetch(API + "/optimizer/run", { method: "POST",
+      headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify({ moteur: "v11", fusion: true }) });
+    const j = await r.json();
+    const dt = ((performance.now() - t0) / 1000).toFixed(1);
+    log(`[STA] ✅ Optimisation terminée en ${dt}s.`);
+    const rent = j.rentabilite;
+    document.getElementById("kpis").innerHTML =
+      `<div><b>${j.nb_tournees}</b><span>tournées</span></div>` +
+      `<div><b>${j.nb_chauffeurs ?? "—"}</b><span>chauffeurs-journées</span></div>` +
+      `<div><b>${j.km_total}</b><span>km</span></div>` +
+      `<div><b>${j.taux_moyen}%</b><span>remplissage</span></div>` +
+      (rent ? `<div><b>${rent.marge_total_eur}€</b><span>marge estimée</span></div>` +
+              `<div><b>${rent.taux_marge_pct}%</b><span>taux de marge</span></div>` : "");
+    document.getElementById("alerte").innerHTML =
+      (rent && rent.tournees_deficitaires && rent.tournees_deficitaires.length)
+        ? `<div class="warn">⚠ Tournée(s) déficitaire(s) : ${rent.tournees_deficitaires.join(", ")}</div>` : "";
+    document.getElementById("rapport").style.display = "block";
+  } catch (e) { log("[STA] ❌ " + e.message); }
+  document.getElementById("btnOpt").disabled = false;
+}
+
+login(); initParc(); majBC();
+</script>
+</body>
+</html>
