@@ -29,6 +29,10 @@ services:
     build: ./backend
     container_name: sta_backend
     restart: unless-stopped
+    ports: 
+      - "8000:8000"
+    volumes:
+       - cachedata:/code/cache_data
     env_file: .env
     environment:
       POSTGRES_HOST: db
@@ -39,14 +43,25 @@ services:
       redis:
         condition: service_started
     networks: [sta_net]
-
+  sta_osrm:
+    image: osrm/osrm-backend
+    container_name: sta_osrm
+    restart: unless-stopped
+    command: osrm-routed --algorithm mld /data/ile-de-france-latest.osrm
+    volumes:
+      - /root/osrm-data:/data
+    networks: [sta_net]
+    expose:
+      - "5000"
   frontend:
     build: ./frontend
     container_name: sta_frontend
     restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
       API_INTERNAL_URL: http://backend:8000
-      NEXT_PUBLIC_API_URL: /api/v1
+      NEXT_PUBLIC_API_URL: http://195.110.34.127:8000/api/v1
     depends_on: [backend]
     networks: [sta_net]
 
@@ -69,6 +84,7 @@ volumes:
   pgdata:
   redisdata:
   certbot_www:
+  cachedata:
 
 networks:
   sta_net:
