@@ -432,3 +432,4 @@ async def document_public(parc: str, type: str, db: AsyncSession = Depends(get_d
         raise HTTPException(404, "document non disponible")
     nom = f"{'VGP' if type == 'vgp' else 'Notice'}_{parc}.pdf"
     return FileResponse(chemin, media_type="application/pdf", filename=nom)
+
