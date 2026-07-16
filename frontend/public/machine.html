@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Fiche machine — VGP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #F1F5F9; color: #0F172A; }
+  header { background: #0B1A2E; color: #fff; padding: 14px 16px; }
+  header .t { font-size: 15px; font-weight: 700; }
+  header .s { font-size: 11px; color: #94A3B8; }
+  .wrap { max-width: 440px; margin: 18px auto; padding: 0 14px; }
+  .card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-bottom: 14px; text-align: center; }
+  .parc { font-size: 24px; font-weight: 900; }
+  .mod { color: #475569; margin-top: 2px; }
+  .badge { display: inline-block; margin-top: 14px; font-size: 15px; font-weight: 800; padding: 9px 22px; border-radius: 99px; }
+  .OK { background: #DCFCE7; color: #166534; }
+  .BIENTOT { background: #FEF3C7; color: #92400E; }
+  .EXPIREE { background: #FEE2E2; color: #991B1B; }
+  .INCONNUE { background: #E2E8F0; color: #475569; }
+  .dates { display: flex; justify-content: center; gap: 26px; margin-top: 16px; font-size: 12px; color: #475569; }
+  .dates b { display: block; font-size: 14px; color: #0F172A; }
+  a.doc { display: block; background: #2C5586; color: #fff; text-decoration: none; font-weight: 700; padding: 13px; border-radius: 10px; margin-top: 10px; text-align: center; }
+  a.doc.sec { background: #fff; color: #2C5586; border: 2px solid #2C5586; }
+  a.doc.off { background: #E2E8F0; color: #94A3B8; pointer-events: none; border: none; }
+  .hist { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-top: 14px; overflow: hidden; }
+  .hist h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #2C5586; padding: 12px 16px; border-bottom: 1px solid #E2E8F0; }
+  .hitem { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #F1F5F9; }
+  .hitem:last-child { border-bottom: none; }
+  .hdate { font-weight: 700; font-size: 13px; min-width: 84px; }
+  .hst { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+  .hobs { flex: 1; font-size: 10.5px; color: #64748B; overflow: hidden; text-overflow: ellipsis; }
+  .hbtn { font-size: 11px; font-weight: 700; color: #2C5586; text-decoration: none; white-space: nowrap; }
+  .hbtn.off { color: #CBD5E1; pointer-events: none; }
+  .foot { text-align: center; color: #94A3B8; font-size: 10px; margin-top: 16px; padding-bottom: 20px; }
+  .err { text-align: center; color: #991B1B; padding: 30px 10px; font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+  <div class="t">Contrôle machine — VGP</div>
+  <div class="s">Accès Industrie · Smart Transport AI</div>
+</header>
+<div class="wrap" id="app">
+  <div class="card" style="color:#64748B">Chargement de la fiche…</div>
+</div>
+<div class="foot">Vérification Générale Périodique — validité 6 mois (PEMP)<br>Historique complet des contrôles — QR code unique par machine</div>
+
+<script>
+const API = "/api/v1";
+const parc = new URLSearchParams(location.search).get("parc");
+const app = document.getElementById("app");
+
+const lib = { OK: "✅ VGP À JOUR", BIENTOT: "⚠ VGP À RENOUVELER SOUS 30 J",
+              EXPIREE: "⛔ VGP EXPIRÉE", INCONNUE: "VGP NON RENSEIGNÉE" };
+
+function statutDe(dateStr) {
+  if (!dateStr) return "INCONNUE";
+  const ech = new Date(dateStr); ech.setDate(ech.getDate() + 182);
+  const restants = Math.floor((ech - new Date()) / 86400000);
+  return restants < 0 ? "EXPIREE" : (restants <= 30 ? "BIENTOT" : "OK");
+}
+
+(async () => {
+  if (!parc) { app.innerHTML = '<div class="err">Aucun n° de parc dans le QR code.</div>'; return; }
+  try {
+    const r = await fetch(`${API}/vgp/public/${encodeURIComponent(parc)}`);
+    if (!r.ok) throw new Error("machine inconnue au registre");
+    const m = await r.json();
+    const rapports = m.rapports || [];
+
+    let histHtml = "";
+    if (rapports.length) {
+      histHtml = `<div class="hist"><h3>📚 Historique des contrôles (${rapports.length})</h3>` +
+        rapports.map((h, i) => {
+          const st = i === 0 ? m.statut : (statutDe(h.date_vgp) === "EXPIREE" || i > 0 ? "ARCHIVE" : "OK");
+          const badge = i === 0
+            ? `<span class="hst ${m.statut}">${m.statut === "BIENTOT" ? "⚠ ACTUELLE" : m.statut === "OK" ? "ACTUELLE" : m.statut}</span>`
+            : `<span class="hst" style="background:#E2E8F0;color:#64748B">archivée</span>`;
+          return `<div class="hitem">
+            <span class="hdate">${h.date_vgp || "—"}</span>
+            ${badge}
+            <span class="hobs">${h.anomalie === "OUI" ? "🔴 anomalie · " : ""}${h.observations ? "📝 " + h.observations : ""}</span>
+            <a class="hbtn ${h.a_fichier ? "" : "off"}" href="${API}/vgp/public/${m.parc}/rapport/${h.id}" target="_blank">PDF ↓</a>
+          </div>`;
+        }).join("") + `</div>`;
+    }
+
+    app.innerHTML = `
+      <div class="card">
+        <div class="parc">PARC ${m.parc}</div>
+        <div class="mod">${m.machine_modele || ""}</div>
+        <div class="badge ${m.statut}">${lib[m.statut] || m.statut}</div>
+        <div class="dates">
+          <div>Dernière VGP<b>${m.date_vgp || "—"}</b></div>
+          <div>Échéance<b>${m.echeance || "—"}</b></div>
+        </div>
+        ${m.numero_serie ? `<div style="margin-top:10px;font-size:11px;color:#64748B">N° de série : <b>${m.numero_serie}</b></div>` : ""}
+        ${m.anomalie === "OUI" ? `<div style="margin-top:10px;font-size:12px;font-weight:800;background:#FEE2E2;border:2px solid #FCA5A5;color:#991B1B;border-radius:8px;padding:9px">🔴 ANOMALIE SIGNALÉE au dernier contrôle — consulter le rapport</div>` : ""}
+        ${m.anomalie === "NON" ? `<div style="margin-top:10px;font-size:11px;color:#166534">✔ Aucune anomalie signalée au dernier contrôle</div>` : ""}
+        ${m.observations ? `<div style="margin-top:8px;text-align:left;font-size:11px;background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;border-radius:8px;padding:8px">📝 <b>Dernières observations :</b> ${m.observations}</div>` : ""}
+      </div>
+      <a class="doc ${m.a_fichier_vgp ? "" : "off"}" href="${API}/vgp/public/${m.parc}/document/vgp" target="_blank">📄 Dernier rapport de VGP (PDF)</a>
+      <a class="doc sec ${m.a_fichier_notice ? "" : "off"}" href="${API}/vgp/public/${m.parc}/document/notice" target="_blank">📘 Notice d'utilisation (PDF)</a>
+      ${histHtml}`;
+  } catch (e) {
+    app.innerHTML = `<div class="err">Machine « ${parc} » introuvable au registre VGP.</div>`;
+  }
+})();
+</script>
+</body>
+</html>
