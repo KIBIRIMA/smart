@@ -53,6 +53,23 @@ services:
     networks: [sta_net]
     expose:
       - "5000"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3 bash -c '</dev/tcp/localhost/5000' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 180s
+
+  autoheal:
+    image: willfarrell/autoheal
+    container_name: sta_autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    networks: [sta_net]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      
   frontend:
     build: ./frontend
     container_name: sta_frontend
