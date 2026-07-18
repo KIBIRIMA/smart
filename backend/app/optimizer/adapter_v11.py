@@ -271,7 +271,36 @@ def run_optimization_v11(missions, params=None) -> dict:
         import pandas as _pd
         # calcul_rentabilite attend un DataFrame de missions ; on reconstruit le
         # minimum nécessaire depuis les tournées si besoin, sinon forfait.
-        rent_df = eng.calcul_rentabilite(tournees, _pd.DataFrame(), gcache, rc)
+        # result_df minimal : 1 ligne/tournée, durée réelle posée par
+        # affecter_chauffeurs (_tps_reel) -> coût chauffeur exact.
+        rent_rows = [{"tour_id": t["tour_id"],
+                      "duration_min": t.get("_tps_reel", 0)} for t in tournees]
+        # Diagnostic : combien de paires dépôt->mission manquent au cache ?
+        _missing = 0
+        for _t in tournees:
+            for _m in _t.get("livraisons", []) + _t.get("recups", []):
+                _c = gcache.get(_m.get("full_adresse"))
+                if _c:
+                    _k = f"{depot['lng']:.5f},{depot['lat']:.5f}->{_c['lng']:.5f},{_c['lat']:.5f}"
+                    if _k not in rc:
+                        _missing += 1
+        print(f"  [rentabilite] cles depot->mission absentes du cache : {_missing}")
+        # Garde-fou : pendant calcul_rentabilite, get_route ne sort JAMAIS
+        # sur ORS (sleeps/retries = hang HTTP). Cache sinon vol d'oiseau x1.4.
+        _orig_get_route = eng.get_route
+        def _get_route_offline(a, b, rcache):
+            if not a or not b:
+                return {"distance_km": None, "duration_min": None}
+            _k = f"{a['lng']:.5f},{a['lat']:.5f}->{b['lng']:.5f},{b['lat']:.5f}"
+            if rcache is not None and _k in rcache:
+                return rcache[_k]
+            _d = round(eng.vd(a, b) * 1.4, 2)
+            return {"distance_km": _d, "duration_min": round(_d / 50 * 60)}
+        eng.get_route = _get_route_offline
+        try:
+            rent_df = eng.calcul_rentabilite(tournees, _pd.DataFrame(rent_rows), gcache, rc)
+        finally:
+            eng.get_route = _orig_get_route
         rentabilite = rent_df.to_dict("records") if hasattr(rent_df, "to_dict") else None
     except Exception as _e:
         rentabilite = None
