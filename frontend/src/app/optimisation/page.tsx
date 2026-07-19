@@ -8,6 +8,12 @@ import { apiFetch } from "@/lib/api";
 import { C } from "@/lib/theme";
 import type { OptimizeResult } from "@/types";
 
+function hMin(min?: number | null): string {
+  if (min == null) return "—";
+  const h = Math.floor(min / 60), m = Math.round(min % 60);
+  return `${h}h${String(m).padStart(2, "0")}`;
+}
+
 export default function OptimisationPage() {
   const [phase, setPhase] = useState<"config" | "running" | "results">("config");
   const [moteur, setMoteur] = useState("v12");
@@ -76,7 +82,7 @@ export default function OptimisationPage() {
       {phase === "results" && result && (
         <div className="fade-up">
           <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap" }}>
-            {[["Tournées", result.nb_tournees], ["Min. théorique", result.nb_tournees_min_theorique],
+            {[["Tournées", result.nb_tournees], ["Estimation initiale", result.nb_tournees_min_theorique],
               ["Kilomètres", `${result.km_total} km`], ["Taux moyen", `${result.taux_moyen}%`],
               ["Moteur", result.moteur], ["Calcul", `${result.duree_calcul_s}s`]].map(([l, v]) => (
               <Card key={l as string} style={{ flex: 1, minWidth: 120, textAlign: "center", padding: 12 }}>
@@ -95,24 +101,39 @@ export default function OptimisationPage() {
                   <span style={{ fontSize: 12, color: C.textMid, marginLeft: 8 }}>
                     {result.nb_tournees} tournées regroupées en{" "}
                     <b style={{ color: C.green }}>{result.nb_chauffeurs} chauffeur{result.nb_chauffeurs > 1 ? "s" : ""}-journée{result.nb_chauffeurs > 1 ? "s" : ""}</b>
+                    <span style={{ color: C.textDim }}> — durées pauses réglementaires incluses</span>
                   </span>
                 </div>
                 <div style={{ fontSize: 28, fontWeight: 900, color: C.green }}>{result.nb_chauffeurs}</div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 8 }}>
-                {result.chauffeurs.map((ch: any) => (
-                  <div key={ch.id} style={{ padding: 10, background: C.navyMid, borderRadius: 8 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>{ch.nom}</div>
-                    <div style={{ fontSize: 11, color: C.textMid }}>Tournées : {ch.tours.join(" + ")}</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
-                      <span style={{ fontSize: 11, color: ch.charge_pct > 95 ? C.orange : C.textMid }}>{ch.duree_texte} / 8h</span>
-                      <span style={{ fontSize: 11, color: ch.charge_pct > 95 ? C.orange : C.green, fontWeight: 700 }}>{ch.charge_pct}%</span>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(210px,1fr))", gap: 8 }}>
+                {result.chauffeurs.map((ch: any) => {
+                  const dureeMin = ch.duree_avec_pauses_min ?? null;
+                  const pct = ch.charge_pct_avec_pauses ?? ch.charge_pct;
+                  const over = !!ch.depassement_8h;
+                  const barColor = over ? C.red : pct > 95 ? C.orange : C.green;
+                  return (
+                    <div key={ch.id} style={{ padding: 10, background: C.navyMid, borderRadius: 8, border: over ? `1px solid ${C.red}` : "none" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                        <span style={{ fontSize: 12, fontWeight: 700 }}>{ch.nom}</span>
+                        {over && <span style={{ fontSize: 10, fontWeight: 800, color: C.red }}>⚠ &gt; 8h</span>}
+                      </div>
+                      <div style={{ fontSize: 11, color: C.textMid }}>
+                        Tournées : {ch.tours.join(" + ")}
+                        {ch.fin_journee ? ` · fin ${ch.fin_journee}` : ""}
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 5 }}>
+                        <span style={{ fontSize: 11, color: over ? C.red : pct > 95 ? C.orange : C.textMid }}>
+                          {dureeMin != null ? hMin(dureeMin) : ch.duree_texte} / 8h
+                        </span>
+                        <span style={{ fontSize: 11, color: barColor, fontWeight: 700 }}>{pct}%</span>
+                      </div>
+                      <div style={{ height: 4, background: C.border, borderRadius: 2, marginTop: 4, overflow: "hidden" }}>
+                        <div style={{ height: "100%", width: `${Math.min(100, pct)}%`, background: barColor }} />
+                      </div>
                     </div>
-                    <div style={{ height: 4, background: C.border, borderRadius: 2, marginTop: 4, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${Math.min(100, ch.charge_pct)}%`, background: ch.charge_pct > 95 ? C.orange : C.green }} />
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Card>
           )}
@@ -160,16 +181,39 @@ export default function OptimisationPage() {
 
           {tab === "tours" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {result.tournees.map((t) => (
+              {result.tournees.map((t: any) => (
                 <Card key={t.index} style={{ borderLeft: `3px solid ${t.couleur}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontWeight: 800 }}>Tournée #{t.index}</span>
-                    <span style={{ fontSize: 12, color: C.textMid }}>{t.nb_missions} missions · {t.km} km · {t.co2_kg} kg CO₂</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, flexWrap: "wrap", gap: 6 }}>
+                    <span style={{ fontWeight: 800 }}>
+                      Tournée #{t.index}
+                      {t.chauffeur && <span style={{ color: C.green, fontWeight: 700 }}> — {t.chauffeur}</span>}
+                    </span>
+                    <span style={{ fontSize: 12, color: C.textMid }}>
+                      {t.nb_missions} missions · {t.km} km · {t.co2_kg} kg CO₂
+                      {t.depart && <> · {t.depart} → {t.fin ?? "?"}</>}
+                    </span>
                   </div>
+                  {(t.conduite_min != null || t.pause_min != null) && (
+                    <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+                      {[["🚛 Conduite", hMin(t.conduite_min)], ["🔧 Manutention", hMin(t.manutention_min)],
+                        ["⏸ Pauses", t.pause_min ? hMin(t.pause_min) : "aucune"]].map(([l, v]) => (
+                        <span key={l as string} style={{ fontSize: 11, color: C.textMid, background: C.navyMid, borderRadius: 6, padding: "3px 9px" }}>
+                          {l} : <b style={{ color: C.text }}>{v}</b>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <Bar pct={t.taux_remplissage} />
                   {t.plateau && t.plateau.length > 0 && (
                     <div style={{ marginTop: 14 }}>
-                      <Plateau25D machines={t.plateau} taux={t.taux_remplissage} tourIndex={t.index} />
+                      <Plateau25D
+                        machines={t.plateau}
+                        taux={t.taux_remplissage}
+                        tourIndex={t.index}
+                        plateauAller={t.plateau_aller}
+                        plateauRetour={t.plateau_retour}
+                        camion={t.camion}
+                      />
                     </div>
                   )}
                 </Card>
@@ -179,9 +223,6 @@ export default function OptimisationPage() {
 
           {tab === "why" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <Card style={{ borderColor: `${C.purple}40`, background: `${C.purple}08` }}>
-                <span style={{ fontSize: 12, color: C.textMid }}>💡 Chaque décision du moteur est tracée et expliquée en langage métier — transparence totale pour la DSI.</span>
-              </Card>
               {result.tournees.map((t) => (
                 <details key={t.index} style={{ background: C.bgCard, border: `1px solid ${C.border}`, borderRadius: 9, padding: 14 }}>
                   <summary style={{ cursor: "pointer", fontWeight: 700, display: "flex", justifyContent: "space-between" }}>
