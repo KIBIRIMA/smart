@@ -16,12 +16,12 @@ export default function TourneesPage() {
         : !tournees?.length ? <Card><EmptyState icon="🚛" title="Aucune tournée" hint="Lancez une optimisation depuis l'onglet Optimisation." /></Card>
         : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {tournees.map((t) => (
+            {tournees.map((t: any) => (
               <Card key={t.id} style={{ borderLeft: `3px solid ${t.couleur}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontWeight: 800, fontSize: 14 }}>
                     <span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", background: t.couleur, marginRight: 8 }} />
-                    {t.chauffeur_nom || "Non assigné"} — {t.vehicule_immat}
+                    {t.chauffeur_nom || t.chauffeur || "Non assigné"} — {t.vehicule_immat}
                   </div>
                   <StatusChip s={t.statut} />
                 </div>
@@ -38,7 +38,7 @@ export default function TourneesPage() {
                   <details style={{ marginTop: 12 }}>
                     <summary style={{ cursor: "pointer", fontSize: 12, color: C.orange, fontWeight: 600 }}>💬 Pourquoi cette tournée ?</summary>
                     <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
-                      {t.explications.map((e, i) => (
+                      {t.explications.map((e: string, i: number) => (
                         <div key={i} style={{ display: "flex", gap: 8, marginBottom: 7 }}>
                           <span style={{ color: C.orange, flexShrink: 0 }}>→</span>
                           <span style={{ fontSize: 12, color: C.textMid }}>{e}</span>
@@ -49,7 +49,14 @@ export default function TourneesPage() {
                 )}
                 {t.plateau && t.plateau.length > 0 && (
                   <div style={{ marginTop: 14 }}>
-                    <Plateau25D machines={t.plateau} taux={t.taux_remplissage} tourIndex={t.id} />
+                    <Plateau25D
+                      machines={t.plateau}
+                      taux={t.taux_remplissage}
+                      tourIndex={t.id}
+                      plateauAller={t.plateau_aller}
+                      plateauRetour={t.plateau_retour}
+                      camion={t.camion}
+                    />
                   </div>
                 )}
                 {t.chronologie && t.chronologie.length > 0 && (
