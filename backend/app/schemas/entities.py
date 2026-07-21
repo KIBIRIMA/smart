@@ -76,6 +76,9 @@ class TourneeOut(BaseModel):
     itineraire: list
     explications: list
     plateau: list = []
+    plateau_aller: dict | None = None
+    plateau_retour: dict | None = None
+    camion: dict | None = None
     chronologie: list = []
     class Config: from_attributes = True
 
