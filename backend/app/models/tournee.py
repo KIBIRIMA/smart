@@ -1,11 +1,8 @@
 from sqlalchemy import String, Float, Integer, ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base, TimestampMixin
-
-
 class Tournee(Base, TimestampMixin):
     __tablename__ = "tournees"
-
     id: Mapped[int] = mapped_column(primary_key=True)
     optimisation_id: Mapped[int | None] = mapped_column(ForeignKey("optimisations.id"), nullable=True)
     chauffeur_id: Mapped[int | None] = mapped_column(ForeignKey("chauffeurs.id"), nullable=True)
@@ -21,9 +18,14 @@ class Tournee(Base, TimestampMixin):
     couleur: Mapped[str] = mapped_column(String(10), default="#E65100")
     # Trace géographique de l'itinéraire : liste de [lat, lng]
     itineraire: Mapped[list] = mapped_column(JSON, default=list)
-    # Explications de l'algorithme (transparence DSI)
+    # Explications de l'algorithme
     explications: Mapped[list] = mapped_column(JSON, default=list)
-    # Machines chargées sur le plateau (pour la vue 2.5D)
+    # Machines chargées sur le plateau (vue 2.5D — liste à plat, compat)
     plateau: Mapped[list] = mapped_column(JSON, default=list)
+    # États plateau ALLER (livraisons) / RETOUR (récups) avec positions calculées
+    plateau_aller: Mapped[dict | None] = mapped_column(JSON, default=dict, nullable=True)
+    plateau_retour: Mapped[dict | None] = mapped_column(JSON, default=dict, nullable=True)
+    # Gabarit du camion de la tournée {label, lon_max, larg_max}
+    camion: Mapped[dict | None] = mapped_column(JSON, default=dict, nullable=True)
     # Chronologie de la tournée : liste d'étapes {heure, lieu, action, machine, duree}
     chronologie: Mapped[list] = mapped_column(JSON, default=list)
