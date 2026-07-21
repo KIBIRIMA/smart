@@ -91,15 +91,18 @@ async def run(body: OptimizeRequest, db: DB, user: CurrentUser):
     for t in result["tournees"]:
         db.add(Tournee(
             optimisation_id=opt.id,
-            chauffeur_nom=t.get("chauffeur_nom", ""),
+            chauffeur_nom=t.get("chauffeur", "") or t.get("chauffeur_nom", ""),
             vehicule_immat=t.get("vehicule_immat", ""),
             nb_missions=t["nb_missions"],
             km=t["km"], co2_kg=t["co2_kg"], taux_remplissage=t["taux_remplissage"],
-            depart=t.get("depart", "05:00"), statut="PLANIFIEE",
+            depart=t.get("depart", "05:00"),
             couleur=t.get("couleur", "#E65100"),
             itineraire=t.get("itineraire", []),
             explications=t.get("explications", []),
             plateau=t.get("plateau", []),
+            plateau_aller=t.get("plateau_aller") or {},
+            plateau_retour=t.get("plateau_retour") or {},
+            camion=t.get("camion") or {},
             chronologie=t.get("chronologie", []),
         ))
     await db.commit()
