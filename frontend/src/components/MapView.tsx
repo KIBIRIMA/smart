@@ -5,6 +5,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { C, TC } from "@/lib/theme";
 import type { Tournee, Mission, Agence } from "@/types";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 // Icônes Leaflet par défaut cassées avec bundlers → divIcons.
 const pin = (color: string, letter: string) =>
@@ -30,8 +31,12 @@ const PURPLE = (C as any).purple || "#8B5CF6";
 
 function FitBounds({ points }: { points: [number, number][] }) {
   const map = useMap();
+  const done = useRef(false);
   useEffect(() => {
-    if (points.length) map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+    if (!done.current && points.length) {
+      map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+      done.current = true;
+    }
   }, [points, map]);
   return null;
 }
