@@ -30,7 +30,8 @@ services:
     container_name: sta_backend
     restart: unless-stopped
     ports: 
-      - "8000:8000"
+      expose:
+      - "8000"      
     volumes:
        - cachedata:/code/cache_data
     env_file: .env
@@ -75,7 +76,8 @@ services:
     container_name: sta_frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      expose:
+      - "3000"
     environment:
       API_INTERNAL_URL: http://backend:8000
       NEXT_PUBLIC_API_URL: http://195.110.34.127:8000/api/v1
