@@ -29,8 +29,7 @@ services:
     build: ./backend
     container_name: sta_backend
     restart: unless-stopped
-    ports: 
-      expose:
+    expose:
       - "8000"      
     volumes:
        - cachedata:/code/cache_data
@@ -75,8 +74,7 @@ services:
     build: ./frontend
     container_name: sta_frontend
     restart: unless-stopped
-    ports:
-      expose:
+    expose:
       - "3000"
     environment:
       API_INTERNAL_URL: http://backend:8000
