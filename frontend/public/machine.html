@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>Fiche machine — VGP</title>
+<title>Contrôle machine — VGP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   * { box-sizing: border-box; margin: 0; }
@@ -10,31 +10,76 @@
   header { background: #0B1A2E; color: #fff; padding: 14px 16px; }
   header .t { font-size: 15px; font-weight: 700; }
   header .s { font-size: 11px; color: #94A3B8; }
-  .wrap { max-width: 440px; margin: 18px auto; padding: 0 14px; }
-  .card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-bottom: 14px; text-align: center; }
-  .parc { font-size: 24px; font-weight: 900; }
+  .wrap { max-width: 460px; margin: 18px auto; padding: 0 14px; }
+  .card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-bottom: 14px; }
+  .center { text-align: center; }
+  .photo { width: 100%; max-height: 190px; object-fit: contain; background: #F8FAFC;
+    border-radius: 10px; margin-bottom: 12px; }
+  .parc { font-size: 26px; font-weight: 900; letter-spacing: .5px; }
   .mod { color: #475569; margin-top: 2px; }
-  .badge { display: inline-block; margin-top: 14px; font-size: 15px; font-weight: 800; padding: 9px 22px; border-radius: 99px; }
+
+  /* ── Écran de saisie du code ── */
+  .lock { font-size: 34px; margin-bottom: 6px; }
+  .intro { color: #475569; font-size: 13px; line-height: 1.55; margin: 10px 0 18px; }
+  input[type=text] { width: 100%; font-size: 22px; font-weight: 800; letter-spacing: 5px;
+    text-align: center; text-transform: uppercase; padding: 14px 10px; border-radius: 10px;
+    border: 2px solid #CBD5E1; outline: none; font-family: inherit; }
+  input[type=text]:focus { border-color: #2C5586; }
+  button.go { width: 100%; margin-top: 12px; background: #2C5586; color: #fff; border: none;
+    font-size: 15px; font-weight: 800; padding: 14px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+  button.go:disabled { background: #94A3B8; cursor: default; }
+  .err { background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; border-radius: 9px;
+    padding: 10px 12px; font-size: 12.5px; font-weight: 700; margin-top: 12px; }
+  .hint { color: #64748B; font-size: 11.5px; margin-top: 14px; line-height: 1.5; }
+
+  /* ── Fiche ── */
+  .badge { display: inline-block; margin-top: 14px; font-size: 15px; font-weight: 800; padding: 10px 22px; border-radius: 99px; }
   .OK { background: #DCFCE7; color: #166534; }
   .BIENTOT { background: #FEF3C7; color: #92400E; }
   .EXPIREE { background: #FEE2E2; color: #991B1B; }
   .INCONNUE { background: #E2E8F0; color: #475569; }
+  .bloc { background: #FEE2E2; border: 2px solid #FCA5A5; color: #991B1B; border-radius: 10px;
+    padding: 11px; font-size: 12.5px; font-weight: 800; margin-top: 12px; }
+  .ok-note { color: #166534; font-size: 11.5px; margin-top: 10px; }
+  .obs { text-align: left; font-size: 11.5px; background: #FFF7ED; border: 1px solid #FED7AA;
+    color: #9A3412; border-radius: 9px; padding: 10px; margin-top: 10px; line-height: 1.5; }
+  .levee { text-align: left; font-size: 11.5px; background: #ECFDF5; border: 1px solid #A7F3D0;
+    color: #065F46; border-radius: 9px; padding: 10px; margin-top: 10px; line-height: 1.5; }
   .dates { display: flex; justify-content: center; gap: 26px; margin-top: 16px; font-size: 12px; color: #475569; }
   .dates b { display: block; font-size: 14px; color: #0F172A; }
-  a.doc { display: block; background: #2C5586; color: #fff; text-decoration: none; font-weight: 700; padding: 13px; border-radius: 10px; margin-top: 10px; text-align: center; }
+  .serie { margin-top: 10px; font-size: 11.5px; color: #64748B; }
+
+  a.doc { display: block; background: #2C5586; color: #fff; text-decoration: none; font-weight: 700;
+    padding: 13px; border-radius: 10px; margin-top: 10px; text-align: center; font-size: 13.5px; }
   a.doc.sec { background: #fff; color: #2C5586; border: 2px solid #2C5586; }
   a.doc.off { background: #E2E8F0; color: #94A3B8; pointer-events: none; border: none; }
-  .hist { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-top: 14px; overflow: hidden; }
-  .hist h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #2C5586; padding: 12px 16px; border-bottom: 1px solid #E2E8F0; }
-  .hitem { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid #F1F5F9; }
+
+  .sect { background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(15,23,42,.08); margin-top: 14px; overflow: hidden; }
+  .sect h3 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .6px; color: #2C5586;
+    padding: 12px 16px; border-bottom: 1px solid #E2E8F0; }
+  .contrat-l { display: flex; justify-content: space-between; padding: 8px 16px; font-size: 12.5px; border-bottom: 1px solid #F1F5F9; }
+  .contrat-l:last-child { border-bottom: none; }
+  .contrat-l span:first-child { color: #64748B; }
+  .contrat-l span:last-child { font-weight: 700; text-align: right; }
+
+  .hitem { padding: 12px 16px; border-bottom: 1px solid #F1F5F9; }
   .hitem:last-child { border-bottom: none; }
-  .hdate { font-weight: 700; font-size: 13px; min-width: 84px; }
-  .hst { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
-  .hobs { flex: 1; font-size: 10.5px; color: #64748B; overflow: hidden; text-overflow: ellipsis; }
-  .hbtn { font-size: 11px; font-weight: 700; color: #2C5586; text-decoration: none; white-space: nowrap; }
-  .hbtn.off { color: #CBD5E1; pointer-events: none; }
-  .foot { text-align: center; color: #94A3B8; font-size: 10px; margin-top: 16px; padding-bottom: 20px; }
-  .err { text-align: center; color: #991B1B; padding: 30px 10px; font-weight: 700; }
+  .hrow { display: flex; align-items: center; gap: 9px; }
+  .hdate { font-weight: 800; font-size: 13px; }
+  .tag { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .tag.ano { background: #FEE2E2; color: #991B1B; }
+  .tag.conf { background: #DCFCE7; color: #166534; }
+  .tag.att { background: #FEF3C7; color: #92400E; }
+  .tag.org { background: #E2E8F0; color: #475569; }
+  .hobs { font-size: 11px; color: #64748B; margin-top: 6px; line-height: 1.5; }
+  .hlev { font-size: 11px; color: #065F46; background: #ECFDF5; border-radius: 7px; padding: 7px 9px; margin-top: 7px; line-height: 1.5; }
+  .hpdf { font-size: 11.5px; font-weight: 700; color: #2C5586; text-decoration: none; margin-left: auto; white-space: nowrap; }
+
+  .bandeau { background: #EFF6FF; border: 1px solid #BFDBFE; color: #1E40AF; border-radius: 9px;
+    padding: 9px 12px; font-size: 11.5px; font-weight: 700; margin-bottom: 12px; }
+  .quit { display: block; width: 100%; margin-top: 6px; background: none; border: none;
+    color: #64748B; font-size: 11.5px; text-decoration: underline; cursor: pointer; padding: 10px; font-family: inherit; }
+  .foot { text-align: center; color: #94A3B8; font-size: 10px; margin-top: 14px; padding-bottom: 26px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -42,71 +87,230 @@
   <div class="t">Contrôle machine — VGP</div>
   <div class="s">Accès Industrie · Smart Transport AI</div>
 </header>
+
 <div class="wrap" id="app">
-  <div class="card" style="color:#64748B">Chargement de la fiche…</div>
+  <div class="card center" style="color:#64748B">Chargement…</div>
 </div>
-<div class="foot">Vérification Générale Périodique — validité 6 mois (PEMP)<br>Historique complet des contrôles — QR code unique par machine</div>
+
+<div class="foot">
+  Vérification Générale Périodique — validité 6 mois (PEMP)<br>
+  Cette fiche complète les documents présents dans la machine, elle ne les remplace pas
+</div>
 
 <script>
-const API = "/api/v1";
-const parc = new URLSearchParams(location.search).get("parc");
-const app = document.getElementById("app");
+const API  = "/api/v1";
+const params = new URLSearchParams(location.search);
+// Le QR porte un jeton opaque (?m=) ; le n° de parc reste accepté pour
+// les étiquettes déjà en circulation.
+const ref  = params.get("m") || params.get("parc");
+const CLE  = "vgp_code_" + ref;
+const app  = document.getElementById("app");
 
-const lib = { OK: "✅ VGP À JOUR", BIENTOT: "⚠ VGP À RENOUVELER SOUS 30 J",
+const LIB = { OK: "✅ VGP À JOUR", BIENTOT: "⚠ VGP À RENOUVELER SOUS 30 J",
               EXPIREE: "⛔ VGP EXPIRÉE", INCONNUE: "VGP NON RENSEIGNÉE" };
 
-function statutDe(dateStr) {
-  if (!dateStr) return "INCONNUE";
-  const ech = new Date(dateStr); ech.setDate(ech.getDate() + 182);
-  const restants = Math.floor((ech - new Date()) / 86400000);
-  return restants < 0 ? "EXPIREE" : (restants <= 30 ? "BIENTOT" : "OK");
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g,
+    c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
-(async () => {
-  if (!parc) { app.innerHTML = '<div class="err">Aucun n° de parc dans le QR code.</div>'; return; }
-  try {
-    const r = await fetch(`${API}/vgp/public/${encodeURIComponent(parc)}`);
-    if (!r.ok) throw new Error("machine inconnue au registre");
-    const m = await r.json();
-    const rapports = m.rapports || [];
+// ─────────────── Écran 1 : socle de sécurité + saisie du code ───────────────
+function vueCode(message, socle) {
+  const m = socle || {};
+  const bloquee = m.anomalie_active === true;
+  const statut = bloquee ? "EXPIREE" : (m.statut || "INCONNUE");
+  const libelle = bloquee ? "⛔ ANOMALIE — MACHINE À VÉRIFIER" : (LIB[m.statut] || "");
 
-    let histHtml = "";
-    if (rapports.length) {
-      histHtml = `<div class="hist"><h3>📚 Historique des contrôles (${rapports.length})</h3>` +
-        rapports.map((h, i) => {
-          const st = i === 0 ? m.statut : (statutDe(h.date_vgp) === "EXPIREE" || i > 0 ? "ARCHIVE" : "OK");
-          const badge = i === 0
-            ? `<span class="hst ${m.statut}">${m.statut === "BIENTOT" ? "⚠ ACTUELLE" : m.statut === "OK" ? "ACTUELLE" : m.statut}</span>`
-            : `<span class="hst" style="background:#E2E8F0;color:#64748B">archivée</span>`;
-          return `<div class="hitem">
-            <span class="hdate">${h.date_vgp || "—"}</span>
-            ${badge}
-            <span class="hobs">${h.anomalie === "OUI" ? "🔴 anomalie · " : ""}${h.observations ? "📝 " + h.observations : ""}</span>
-            <a class="hbtn ${h.a_fichier ? "" : "off"}" href="${API}/vgp/public/${m.parc}/rapport/${h.id}" target="_blank">PDF ↓</a>
-          </div>`;
-        }).join("") + `</div>`;
-    }
+  // Information de SÉCURITÉ : accessible à toute personne qui monte sur la
+  // machine, sans code. Aucune donnée client n'y figure.
+  const photo = m.a_photo
+    ? `<img class="photo" alt="" src="${API}/vgp/public/${encodeURIComponent(ref)}/document/photo">`
+    : "";
 
-    app.innerHTML = `
-      <div class="card">
-        <div class="parc">PARC ${m.parc}</div>
-        <div class="mod">${m.machine_modele || ""}</div>
-        <div class="badge ${m.statut}">${lib[m.statut] || m.statut}</div>
-        <div class="dates">
-          <div>Dernière VGP<b>${m.date_vgp || "—"}</b></div>
-          <div>Échéance<b>${m.echeance || "—"}</b></div>
-        </div>
-        ${m.numero_serie ? `<div style="margin-top:10px;font-size:11px;color:#64748B">N° de série : <b>${m.numero_serie}</b></div>` : ""}
-        ${m.anomalie === "OUI" ? `<div style="margin-top:10px;font-size:12px;font-weight:800;background:#FEE2E2;border:2px solid #FCA5A5;color:#991B1B;border-radius:8px;padding:9px">🔴 ANOMALIE SIGNALÉE au dernier contrôle — consulter le rapport</div>` : ""}
-        ${m.anomalie === "NON" ? `<div style="margin-top:10px;font-size:11px;color:#166534">✔ Aucune anomalie signalée au dernier contrôle</div>` : ""}
-        ${m.observations ? `<div style="margin-top:8px;text-align:left;font-size:11px;background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;border-radius:8px;padding:8px">📝 <b>Dernières observations :</b> ${m.observations}</div>` : ""}
+  const entete = m.parc ? `
+    <div class="card center" style="margin-bottom:14px">
+      ${photo}
+      <div class="parc">PARC ${esc(m.parc)}</div>
+      <div class="mod">${esc(m.machine_modele || "")}</div>
+      ${libelle ? `<div class="badge ${statut}">${libelle}</div>` : ""}
+      <div class="dates">
+        <div>Dernière VGP<b>${esc(m.date_vgp || "—")}</b></div>
+        <div>Échéance<b>${esc(m.echeance || "—")}</b></div>
       </div>
-      <a class="doc ${m.a_fichier_vgp ? "" : "off"}" href="${API}/vgp/public/${m.parc}/document/vgp" target="_blank">📄 Dernier rapport de VGP (PDF)</a>
-      <a class="doc sec ${m.a_fichier_notice ? "" : "off"}" href="${API}/vgp/public/${m.parc}/document/notice" target="_blank">📘 Notice d'utilisation (PDF)</a>
-      ${histHtml}`;
+      ${bloquee ? `<div class="bloc">
+        🔴 ANOMALIE SIGNALÉE au dernier contrôle et non levée —
+        ne pas utiliser la machine sans accord de l'agence.</div>` : ""}
+      ${m.rappel_documents ? `<div class="obs" style="background:#EFF6FF;border-color:#BFDBFE;color:#1E40AF">
+        📄 ${esc(m.rappel_documents)}</div>` : ""}
+    </div>` : "";
+
+  app.innerHTML = entete + `
+    <div class="card center">
+      <div class="lock">🔒</div>
+      ${m.parc ? "" : `<div class="parc">MACHINE ${esc(ref)}</div>`}
+      <p class="intro">
+        <b>Contrat, historique et documents</b> sont réservés.<br>
+        Saisissez le code figurant sur votre contrat de location,
+        ou votre code de service.
+      </p>
+      <input type="text" id="code" maxlength="14" autocomplete="off"
+             autocapitalize="characters" spellcheck="false" placeholder="••••••••">
+      <button class="go" id="btn">Accéder à la fiche</button>
+      ${message ? `<div class="err">${esc(message)}</div>` : ""}
+      <p class="hint">
+        Le code est propre à votre contrat : il cesse de fonctionner à la fin
+        de la location. En cas de difficulté, contactez votre agence.
+      </p>
+    </div>`;
+
+  const champ = document.getElementById("code");
+  const bouton = document.getElementById("btn");
+  const envoyer = () => {
+    const c = champ.value.trim().toUpperCase();
+    if (!c) { champ.focus(); return; }
+    bouton.disabled = true;
+    bouton.textContent = "Vérification…";
+    charger(c);
+  };
+  bouton.addEventListener("click", envoyer);
+  champ.addEventListener("keydown", e => { if (e.key === "Enter") envoyer(); });
+  champ.focus();
+}
+
+// ─────────────── Écran 2 : fiche machine ───────────────
+function vueFiche(m, code) {
+  const q = "?code=" + encodeURIComponent(code);
+  const atelier  = m.niveau === "ATELIER";
+  const service  = m.niveau === "AGENCE" || atelier;
+  const bloquee  = m.anomalie_active === true;
+  const statut   = bloquee ? "EXPIREE" : (m.statut || "INCONNUE");
+  const libelle  = bloquee ? "⛔ ANOMALIE — MACHINE À VÉRIFIER" : (LIB[m.statut] || m.statut);
+
+  const rapports = m.rapports || [];
+  const histo = rapports.length ? `
+    <div class="sect">
+      <h3>📚 Historique des contrôles (${rapports.length})</h3>
+      ${rapports.map(r => `
+        <div class="hitem">
+          <div class="hrow">
+            <span class="hdate">${esc(r.date_vgp || "—")}</span>
+            ${r.anomalie === "OUI"
+              ? '<span class="tag ano">ANOMALIE</span>'
+              : (r.anomalie === "NON" ? '<span class="tag conf">CONFORME</span>' : "")}
+            ${r.publie === false ? '<span class="tag att">EN ATTENTE</span>' : ""}
+            ${r.organisme ? `<span class="tag org">${esc(r.organisme)}</span>` : ""}
+            ${r.a_fichier ? `<a class="hpdf" target="_blank"
+               href="${API}/vgp/public/${encodeURIComponent(m.parc)}/rapport/${r.id}${q}">PDF ↓</a>` : ""}
+          </div>
+          ${r.depose_le ? `<div style="font-size:10px;color:#94A3B8;margin-top:3px">
+            déposé le ${esc(r.depose_le)}</div>` : ""}
+          ${r.observations ? `<div class="hobs">📝 ${esc(r.observations)}</div>` : ""}
+          ${(r.levees || []).map(l => `
+            <div class="hlev">
+              ✅ <b>Anomalie levée le ${esc(l.date_levee)}</b> — ${esc(l.auteur)}<br>
+              ${esc(l.description)}
+            </div>`).join("")}
+        </div>`).join("")}
+    </div>` : "";
+
+  const c = m.contrat;
+  const contrat = c ? `
+    <div class="sect">
+      <h3>📄 Contrat de location</h3>
+      <div class="contrat-l"><span>N° de contrat</span><span>${esc(c.numero_contrat)}</span></div>
+      <div class="contrat-l"><span>Client</span><span>${esc(c.client_nom)}</span></div>
+      ${c.chantier ? `<div class="contrat-l"><span>Chantier</span><span>${esc(c.chantier)}</span></div>` : ""}
+      ${c.ville ? `<div class="contrat-l"><span>Ville</span><span>${esc(c.ville)}</span></div>` : ""}
+      <div class="contrat-l"><span>Période</span><span>${esc(c.date_debut || "—")} → ${esc(c.date_fin || "en cours")}</span></div>
+    </div>` : "";
+
+  app.innerHTML = `
+    ${service ? `<div class="bandeau">🔧 Accès de service — ${esc(m.acces_libelle || "")}${
+        atelier ? " · rapports en attente inclus" : ""}</div>` : ""}
+    <div class="card center">
+      ${m.a_photo ? `<img class="photo" alt=""
+         src="${API}/vgp/public/${encodeURIComponent(m.parc)}/document/photo${q}">` : ""}
+      <div class="parc">PARC ${esc(m.parc)}</div>
+      <div class="mod">${esc(m.machine_modele || "")}</div>
+      <div class="badge ${statut}">${libelle}</div>
+      <div class="dates">
+        <div>Dernière VGP<b>${esc(m.date_vgp || "—")}</b></div>
+        <div>Échéance<b>${esc(m.echeance || "—")}</b></div>
+      </div>
+      ${m.numero_serie ? `<div class="serie">N° de série : <b>${esc(m.numero_serie)}</b></div>` : ""}
+      ${bloquee ? `<div class="bloc">
+          🔴 ANOMALIE SIGNALÉE au dernier contrôle et non levée à ce jour —
+          ne pas utiliser la machine sans accord de l'agence.
+        </div>` : ""}
+      ${(!bloquee && m.levee) ? `<div class="levee">
+          ✅ <b>Anomalie levée le ${esc(m.levee.date_levee)}</b> par ${esc(m.levee.auteur)}<br>
+          ${esc(m.levee.description)}
+        </div>` : ""}
+      ${(!bloquee && !m.levee && m.anomalie === "NON") ?
+        `<div class="ok-note">✔ Aucune anomalie signalée au dernier contrôle</div>` : ""}
+      ${m.observations && bloquee ? `<div class="obs">📝 <b>Réserves de l'inspecteur :</b><br>${esc(m.observations)}</div>` : ""}
+    </div>
+
+    <a class="doc ${m.a_fichier_vgp ? "" : "off"}" target="_blank"
+       href="${API}/vgp/public/${encodeURIComponent(m.parc)}/document/vgp${q}">📄 Dernier rapport de VGP</a>
+    <a class="doc sec ${m.a_fichier_notice ? "" : "off"}" target="_blank"
+       href="${API}/vgp/public/${encodeURIComponent(m.parc)}/document/notice${q}">📘 Notice d'utilisation</a>
+    <a class="doc sec ${m.a_fichier_fiche_technique ? "" : "off"}" target="_blank"
+       href="${API}/vgp/public/${encodeURIComponent(m.parc)}/document/fiche_technique${q}">📐 Fiche technique</a>
+    <a class="doc sec ${m.a_fichier_carnet ? "" : "off"}" target="_blank"
+       href="${API}/vgp/public/${encodeURIComponent(m.parc)}/document/carnet${q}">🔧 Carnet de maintenance${
+         m.a_fichier_carnet ? "" : " (non disponible)"}</a>
+
+    ${contrat}
+    ${histo}
+    <button class="quit" id="quit">Quitter cette session</button>`;
+
+  document.getElementById("quit").addEventListener("click", () => {
+    try { sessionStorage.removeItem(CLE); } catch (e) {}
+    charger("");
+  });
+}
+
+// ─────────────── Appel API ───────────────
+async function charger(code) {
+  try {
+    const r = await fetch(`${API}/vgp/public/${encodeURIComponent(ref)}`
+      + (code ? `?code=${encodeURIComponent(code)}` : ""));
+    if (r.status === 404) {
+      app.innerHTML = `<div class="card center err">Machine « ${esc(ref)} » introuvable au registre.</div>`;
+      return;
+    }
+    if (r.status === 429) {
+      try { sessionStorage.removeItem(CLE); } catch (e) {}
+      vueCode("Trop de tentatives sur cette machine. Réessayez dans quelques minutes.", null);
+      return;
+    }
+    if (!r.ok) throw new Error("indisponible");
+
+    const m = await r.json();
+    if (!m.code_valide) {
+      // Le socle de sécurité est affiché ; seul le détail reste protégé.
+      try { sessionStorage.removeItem(CLE); } catch (e) {}
+      vueCode(code ? "Code incorrect ou contrat expiré." : null, m);
+      return;
+    }
+    // Le code n'est conservé que le temps de l'onglet : il disparaît à sa fermeture.
+    try { sessionStorage.setItem(CLE, code); } catch (e) {}
+    vueFiche(m, code);
   } catch (e) {
-    app.innerHTML = `<div class="err">Machine « ${parc} » introuvable au registre VGP.</div>`;
+    app.innerHTML = `<div class="card center err">Service momentanément indisponible.</div>`;
   }
+}
+
+// ─────────────── Démarrage ───────────────
+(function () {
+  if (!ref) {
+    app.innerHTML = `<div class="card center err">Aucun n° de parc dans le QR code.</div>`;
+    return;
+  }
+  let memo = null;
+  try { memo = sessionStorage.getItem(CLE); } catch (e) {}
+  charger(memo || "");   // sans code : socle de sécurité
 })();
 </script>
 </body>
