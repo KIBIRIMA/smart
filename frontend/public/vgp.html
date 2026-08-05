@@ -8,62 +8,178 @@
 <style>
   * { box-sizing: border-box; margin: 0; }
   body { font-family: "Segoe UI", Arial, sans-serif; background: #060F1E; color: #F1F5F9; font-size: 13px; }
-  header { background: #0B1A2E; border-bottom: 2px solid #E65100; padding: 12px 18px; display: flex; align-items: center; gap: 12px; }
-  header h1 { font-size: 16px; } header .sub { color: #94A3B8; font-size: 11px; margin-left: 6px; }
-  .wrap { max-width: 1080px; margin: 16px auto; padding: 0 14px; }
+  header { background: #0B1A2E; border-bottom: 2px solid #E65100; padding: 12px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { font-size: 16px; }
+  header .sub { color: #94A3B8; font-size: 11px; }
+  header .right { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 11px; color: #94A3B8; }
+  .wrap { max-width: 1120px; margin: 16px auto; padding: 0 14px; }
   .panel { background: #0B1A2E; border: 1px solid #1E2F5A; border-radius: 10px; margin-bottom: 14px; }
-  .panel h2 { font-size: 12px; padding: 10px 14px; border-bottom: 1px solid #1E2F5A; color: #FF7043; text-transform: uppercase; letter-spacing: .6px; }
+  .panel h2 { font-size: 12px; padding: 10px 14px; border-bottom: 1px solid #1E2F5A; color: #FF7043;
+    text-transform: uppercase; letter-spacing: .6px; display: flex; align-items: center; gap: 8px; }
+  .panel h2 .c { background: #7F1D1D; color: #FCA5A5; border-radius: 99px; padding: 1px 9px; font-size: 11px; }
   .panel .body { padding: 14px; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; }
   th { text-align: left; padding: 7px 9px; color: #94A3B8; border-bottom: 1px solid #1E2F5A; font-weight: 600; }
-  td { padding: 7px 9px; border-bottom: 1px solid #12233F; }
-  .st { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; }
+  td { padding: 7px 9px; border-bottom: 1px solid #12233F; vertical-align: top; }
+  .st { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 99px; white-space: nowrap; display: inline-block; }
   .st.OK { background: #14532D; color: #86EFAC; }
   .st.BIENTOT { background: #713F12; color: #FDE68A; }
   .st.EXPIREE { background: #7F1D1D; color: #FCA5A5; }
   .st.INCONNUE { background: #1E2F5A; color: #94A3B8; }
-  input, button { font: inherit; border-radius: 7px; }
-  input { background: #060F1E; border: 1px solid #1E2F5A; color: #F1F5F9; padding: 8px; }
+  .st.ATT { background: #713F12; color: #FDE68A; }
+  .st.PUB { background: #14532D; color: #86EFAC; }
+  input, select, textarea, button { font: inherit; border-radius: 7px; font-family: inherit; }
+  input, select, textarea { background: #060F1E; border: 1px solid #1E2F5A; color: #F1F5F9; padding: 8px; }
+  textarea { width: 100%; resize: vertical; min-height: 76px; }
   button { cursor: pointer; border: none; padding: 8px 13px; font-weight: 700; }
   .bp { background: #E65100; color: #fff; }
+  .bg { background: #166534; color: #fff; }
   .bs { background: transparent; color: #94A3B8; border: 1px solid #1E2F5A; }
-  .bs.small { font-size: 11px; padding: 5px 9px; }
+  .bs.small, .bp.small, .bg.small { font-size: 11px; padding: 5px 9px; }
   .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
   label { font-size: 11px; color: #94A3B8; display: block; margin-bottom: 3px; }
-  #qrmodal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); align-items: center; justify-content: center; }
+  .note { color: #64748B; font-size: 11px; margin-top: 8px; line-height: 1.5; }
+  .alerte { background: #7F1D1D22; border: 1px solid #7F1D1D; color: #FCA5A5; border-radius: 8px;
+    padding: 9px 12px; font-size: 12px; margin-bottom: 10px; }
+  .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); align-items: center;
+    justify-content: center; z-index: 20; padding: 14px; }
+  .modal .box { background: #0B1A2E; border: 1px solid #1E2F5A; border-radius: 12px; padding: 22px;
+    max-width: 520px; width: 100%; max-height: 92vh; overflow: auto; }
+  .modal h3 { font-size: 14px; margin-bottom: 12px; }
+  .code-box { background: #060F1E; border: 2px dashed #E65100; border-radius: 10px; padding: 16px;
+    text-align: center; margin: 12px 0; }
+  .code-box .v { font-size: 26px; font-weight: 900; letter-spacing: 6px; color: #FF7043; }
   #qrbox { background: #fff; color: #0F172A; border-radius: 12px; padding: 26px; text-align: center; }
   #qrbox .parc { font-size: 20px; font-weight: 900; margin-top: 12px; }
-  #qrbox .mod { color: #475569; font-size: 13px; }
-  #qrbox .hint { color: #64748B; font-size: 10px; margin-top: 10px; max-width: 240px; }
   #qrdiv { display: flex; justify-content: center; }
-  .file-mini { font-size: 10px; }
-  @media print {
-    body * { visibility: hidden; }
-    #qrmodal, #qrmodal * { visibility: visible; }
-    #qrmodal { position: absolute; background: #fff; }
-  }
+  /* ── Connexion ── */
+  .login { max-width: 380px; margin: 60px auto; }
+  .login input { width: 100%; margin-bottom: 10px; padding: 11px; }
+  .login button { width: 100%; padding: 12px; }
+  @media print { body * { visibility: hidden; } #qrmodal, #qrmodal * { visibility: visible; } #qrmodal { position: absolute; background: #fff; } }
 </style>
 </head>
 <body>
+
+<!-- ═══════════ CONNEXION ═══════════ -->
+<div id="ecran-login" style="display:none">
+  <div class="wrap login">
+    <div class="panel">
+      <h2>🛡 Registre VGP — connexion</h2>
+      <div class="body">
+        <label>Adresse e-mail</label>
+        <input type="email" id="l-email" autocomplete="username">
+        <label>Mot de passe</label>
+        <input type="password" id="l-pass" autocomplete="current-password">
+        <button class="bp" id="l-btn">Se connecter</button>
+        <div id="l-err" class="alerte" style="display:none"></div>
+        <div class="note">Accès réservé aux personnels habilités d'Accès Industrie.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ APPLICATION ═══════════ -->
+<div id="ecran-app" style="display:none">
 <header>
   <h1>🛡 Registre VGP</h1>
-  <span class="sub">Vérifications Générales Périodiques — QR unique par machine, historique complet • Smart Transport AI</span>
-  <span style="margin-left:auto"><a href="/" style="color:#94A3B8;font-size:11px">← Retour à l'application</a></span>
+  <span class="sub">Vérifications Générales Périodiques · QR unique par machine</span>
+  <span class="right">
+    <span id="u-nom"></span>
+    <a href="/" style="color:#94A3B8">← Application</a>
+    <button class="bs small" id="btn-quit">Déconnexion</button>
+  </span>
 </header>
 
 <div class="wrap">
+
+  <!-- Dépôt des rapports -->
   <div class="panel" style="border-color:#E65100">
-    <h2>📥 Déposer les rapports VGP des inspecteurs (lecture automatique)</h2>
+    <h2>📥 Déposer les rapports des organismes de contrôle</h2>
     <div class="body">
-      <div id="drop" style="border:2px dashed #1E2F5A;border-radius:10px;padding:26px;text-align:center;cursor:pointer;color:#94A3B8">
+      <div id="drop" style="border:2px dashed #1E2F5A;border-radius:10px;padding:24px;text-align:center;cursor:pointer;color:#94A3B8">
         Glissez ici les PDF reçus (plusieurs à la fois) ou cliquez pour choisir<br>
-        <span style="font-size:11px">→ chaque rapport est lu, rattaché à sa machine par n° de parc, et AJOUTÉ à l'historique — sans saisie, sans écrasement.</span>
+        <span style="font-size:11px">Chaque rapport est lu, rattaché à sa machine par n° de parc et ajouté à l'historique.
+        Un rapport <b>conforme</b> est publié automatiquement ; un rapport <b>en anomalie</b> attend la décision de l'atelier.</span>
         <input type="file" id="pdfs" accept=".pdf" multiple style="display:none">
       </div>
       <div id="recap" style="margin-top:12px"></div>
     </div>
   </div>
 
+  <!-- File d'attente atelier -->
+  <div class="panel" id="p-attente" style="display:none;border-color:#B45309">
+    <h2>⏳ Rapports en attente de traitement <span class="c" id="n-attente"></span></h2>
+    <div class="body">
+      <div class="note" style="margin-top:0;margin-bottom:10px">
+        Ces rapports ne sont <b>pas visibles</b> au scan du QR code. Publier rend le rapport
+        consultable par le locataire ; lever l'anomalie déclare la réparation effectuée.
+      </div>
+      <table>
+        <thead><tr><th>Parc</th><th>Modèle</th><th>Date VGP</th><th>Ancienneté</th><th>Anomalie</th><th>Réserves</th><th></th></tr></thead>
+        <tbody id="tb-attente"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Échéances VGP -->
+  <div class="panel" id="p-ech" style="display:none;border-color:#B45309">
+    <h2>📅 VGP arrivant à échéance <span class="c" id="n-ech"></span></h2>
+    <div class="body">
+      <div class="note" style="margin-top:0;margin-bottom:10px">
+        Machines dont la VGP expire sous 30 jours. Les machines
+        <b>sur chantier</b> doivent être contrôlées sur place : prévoir le
+        délai d'accès au site. Sélectionnez, choisissez le prestataire, puis
+        validez — le bon de commande part par courriel.
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:28px"><input type="checkbox" id="ech-all" style="width:15px;height:15px"></th>
+          <th>Parc</th><th>Modèle</th><th>Échéance</th><th>Reste</th>
+          <th>Situation</th><th>Client / chantier</th><th>Demande</th>
+        </tr></thead>
+        <tbody id="tb-ech"></tbody>
+      </table>
+      <div class="row" style="margin-top:12px;align-items:end">
+        <div><label>Prestataire</label><select id="d-presta" style="min-width:230px"></select></div>
+        <div><label>Intervention souhaitée à partir du</label><input type="date" id="d-date"></div>
+        <div style="flex:1;min-width:220px"><label>Précisions (accès, badges, horaires…)</label>
+          <input id="d-comm" style="width:100%"></div>
+        <button class="bp" id="btn-demande">📤 Créer la demande</button>
+      </div>
+      <div id="d-res" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- Demandes d'intervention -->
+  <div class="panel" id="p-dem" style="display:none">
+    <h2>📄 Demandes d'intervention</h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Référence</th><th>Prestataire</th><th>Machines</th>
+          <th>Statut</th><th>Validée par</th><th></th></tr></thead>
+        <tbody id="tb-dem"></tbody>
+      </table>
+      <div class="note">
+        Un bon de commande engage l'entreprise : aucune émission n'est
+        automatique. Si l'envoi du courriel échoue, la demande reste validée
+        et le PDF téléchargeable pour un envoi manuel.
+      </div>
+    </div>
+  </div>
+
+  <!-- Registre -->
+  <div class="panel">
+    <h2>Machines au registre <span id="n" style="color:#94A3B8;font-weight:400"></span></h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Parc</th><th>Modèle</th><th>Dernière VGP</th><th>Échéance</th><th>État</th><th>Historique</th><th>Dossier machine</th><th>Contrat</th><th>QR</th></tr></thead>
+        <tbody id="tb"><tr><td colspan="9" style="color:#64748B;padding:16px;text-align:center">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Saisie manuelle -->
   <div class="panel">
     <h2>Saisie manuelle (secours)</h2>
     <div class="body">
@@ -71,164 +187,663 @@
         <div><label>N° de parc</label><input id="f-parc" placeholder="ex. 12336" style="width:110px"></div>
         <div><label>Modèle</label><input id="f-mod" placeholder="ex. ZEBRA 12" style="width:170px"></div>
         <div><label>Date de la dernière VGP</label><input id="f-date" type="date"></div>
-        <button class="bp" onclick="upsert()">💾 Enregistrer</button>
+        <button class="bp" id="btn-upsert">💾 Enregistrer</button>
       </div>
-      <div style="color:#64748B;font-size:11px;margin-top:8px">
-        Validité réglementaire : 6 mois (PEMP). Le statut passe en ⚠ « bientôt » à 30 jours de l'échéance.
-      </div>
+      <div class="note">Validité réglementaire : 6 mois (PEMP). Le statut passe en ⚠ « bientôt » à 30 jours de l'échéance.</div>
     </div>
   </div>
 
-  <div class="panel">
-    <h2>Machines au registre <span id="n" style="color:#94A3B8"></span></h2>
+  <!-- Codes de service (admin) -->
+  <div class="panel" id="p-codes" style="display:none">
+    <h2>🔧 Codes de service — agents Accès Industrie</h2>
     <div class="body">
-      <table>
-        <thead><tr><th>Parc</th><th>Modèle</th><th>Dernière VGP</th><th>Échéance</th><th>Statut</th><th>Historique</th><th>Notice</th><th>QR</th></tr></thead>
-        <tbody id="tb"><tr><td colspan="8" style="color:#64748B;padding:16px;text-align:center">Chargement…</td></tr></tbody>
+      <div class="row">
+        <div><label>Libellé</label><input id="ca-lib" placeholder="ex. Atelier Lieusaint" style="width:220px"></div>
+        <div><label>Portée</label>
+          <select id="ca-portee">
+            <option value="AGENCE">AGENCE — rapports publiés</option>
+            <option value="ATELIER">ATELIER — y compris en attente</option>
+          </select>
+        </div>
+        <button class="bp" id="btn-code">Générer un code</button>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th>Libellé</th><th>Code</th><th>Portée</th><th>État</th><th></th></tr></thead>
+        <tbody id="tb-codes"></tbody>
       </table>
+      <div class="note">
+        Un code de service est un <b>secret partagé</b> : il ne trace pas qui consulte et vaut pour
+        tout le parc. À renouveler périodiquement. Les actions engageantes — publication, levée —
+        exigent un compte nominatif, jamais un code.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ MODALES ═══════════ -->
+<div class="modal" id="m-levee">
+  <div class="box">
+    <h3>✅ Lever l'anomalie</h3>
+    <div id="lv-ctx" class="note" style="margin-top:0"></div>
+    <div style="margin-top:12px">
+      <label>Nature de l'intervention réalisée *</label>
+      <textarea id="lv-desc" placeholder="Ex. : remplacement du talon de fourche, reprise de l'étanchéité du raccord hydraulique, contrôle du réglage des chaînes."></textarea>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label>Date de la levée</label><input type="date" id="lv-date"></div>
+      <div><label>Justificatif (facultatif)</label><input type="file" id="lv-file" accept=".pdf,.jpg,.jpeg,.png"></div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;margin-top:12px;color:#F1F5F9">
+      <input type="checkbox" id="lv-pub" checked style="width:16px;height:16px"> Publier le rapport dans la foulée
+    </label>
+    <div id="lv-err" class="alerte" style="display:none;margin-top:10px"></div>
+    <div class="note">
+      La levée est enregistrée à votre nom et horodatée. Le rapport en anomalie reste dans
+      l'historique : c'est la trace du défaut <b>et</b> de sa correction qui donne sa valeur au registre.
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="bg" id="lv-ok" style="flex:1">Enregistrer la levée</button>
+      <button class="bs" id="lv-no">Annuler</button>
     </div>
   </div>
 </div>
 
-<div id="qrmodal" onclick="this.style.display='none'">
-  <div id="qrbox" onclick="event.stopPropagation()">
+<div class="modal" id="m-contrat">
+  <div class="box">
+    <h3>📄 Nouveau contrat de location</h3>
+    <div id="ct-ctx" class="note" style="margin-top:0"></div>
+    <div class="row" style="margin-top:12px">
+      <div><label>N° de contrat *</label><input id="ct-num" style="width:170px"></div>
+      <div style="flex:1"><label>Client *</label><input id="ct-client" style="width:100%"></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div style="flex:1"><label>Chantier</label><input id="ct-chantier" style="width:100%"></div>
+      <div><label>Ville</label><input id="ct-ville" style="width:150px"></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div><label>Début *</label><input type="date" id="ct-deb"></div>
+      <div><label>Fin</label><input type="date" id="ct-fin"></div>
+    </div>
+    <div id="ct-err" class="alerte" style="display:none;margin-top:10px"></div>
+    <div id="ct-res"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="bp" id="ct-ok" style="flex:1">Créer et générer le code</button>
+      <button class="bs" id="ct-no">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="m-contrats-liste">
+  <div class="box">
+    <h3>📄 Contrats de la machine</h3>
+    <div id="cl-body"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="bs" id="cl-no" style="flex:1">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="qrmodal">
+  <div id="qrbox">
     <div id="qrdiv"></div>
     <div class="parc" id="qr-parc"></div>
-    <div class="mod" id="qr-mod"></div>
-    <div class="hint">Scannez pour consulter le statut VGP, l'historique complet des contrôles et la notice de cette machine. QR unique et permanent.</div>
-    <div style="margin-top:14px; display:flex; gap:8px; justify-content:center">
-      <button class="bp" onclick="window.print()">🖨 Imprimer l'étiquette</button>
-      <button class="bs" onclick="document.getElementById('qrmodal').style.display='none'">Fermer</button>
+    <div style="color:#475569;font-size:13px" id="qr-mod"></div>
+    <div style="color:#64748B;font-size:10px;margin-top:10px;max-width:250px">
+      QR unique et permanent. Le scan demande un code : celui du contrat de
+      location, ou un code de service.
     </div>
-  </div>
-</div>
-
-<div id="anmodal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);align-items:center;justify-content:center;z-index:10">
-  <div style="background:#0B1A2E;border:1px solid #1E2F5A;border-radius:12px;padding:22px;max-width:480px;width:92%" onclick="event.stopPropagation()">
-    <div style="font-weight:800;font-size:14px;margin-bottom:12px">🔎 Analyse du rapport VGP</div>
-    <div id="an-body" style="font-size:12px;line-height:1.7"></div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="bs" style="flex:1" onclick="document.getElementById('anmodal').style.display='none'">Fermer</button>
+    <div style="margin-top:14px;display:flex;gap:8px;justify-content:center">
+      <button class="bp" onclick="window.print()">🖨 Imprimer</button>
+      <button class="bs" id="qr-no">Fermer</button>
     </div>
-    <div style="color:#64748B;font-size:10px;margin-top:8px">Lecture automatique du PDF (formats variables selon l'organisme). Le rapport a été ajouté à l'historique de la machine.</div>
   </div>
 </div>
 
 <script>
 const API = "/api/v1";
-let TOKEN = null;
+const CLE_TOKEN = "vgp_token";
+let TOKEN = null, MOI = null;
 
-async function login() {
-  const r = await fetch(API + "/auth/login", { method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: "username=heinrich.weber%40acces-industrie.fr&password=exploit123" });
-  TOKEN = (await r.json()).access_token;
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g,
+    c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+const $ = id => document.getElementById(id);
+const ouvrir = id => { $(id).style.display = "flex"; };
+const fermer = id => { $(id).style.display = "none"; };
+
+async function api(chemin, options = {}) {
+  const o = Object.assign({}, options);
+  o.headers = Object.assign({}, o.headers || {}, { Authorization: "Bearer " + TOKEN });
+  const r = await fetch(API + chemin, o);
+  if (r.status === 401) { deconnexion(); throw new Error("session expirée"); }
+  return r;
 }
 
-async function charger() {
-  const r = await fetch(API + "/vgp/machines", { headers: { Authorization: "Bearer " + TOKEN } });
+// ─────────────── Authentification ───────────────
+async function connexion() {
+  const email = $("l-email").value.trim(), pass = $("l-pass").value;
+  const err = $("l-err");
+  err.style.display = "none";
+  if (!email || !pass) { err.textContent = "Identifiants requis."; err.style.display = "block"; return; }
+  try {
+    const body = new URLSearchParams({ username: email, password: pass });
+    const r = await fetch(API + "/auth/login", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
+    if (!r.ok) {
+      err.textContent = r.status === 401 ? "Adresse e-mail ou mot de passe incorrect."
+        : (r.status === 403 ? "Compte désactivé." : "Connexion impossible.");
+      err.style.display = "block";
+      return;
+    }
+    const j = await r.json();
+    TOKEN = j.access_token;
+    try { sessionStorage.setItem(CLE_TOKEN, TOKEN); } catch (e) {}
+    await demarrer();
+  } catch (e) {
+    err.textContent = "Service indisponible."; err.style.display = "block";
+  }
+}
+
+function deconnexion() {
+  TOKEN = null; MOI = null;
+  try { sessionStorage.removeItem(CLE_TOKEN); } catch (e) {}
+  $("ecran-app").style.display = "none";
+  $("ecran-login").style.display = "block";
+}
+
+async function demarrer() {
+  try {
+    const r = await api("/auth/me");
+    if (!r.ok) { deconnexion(); return; }
+    MOI = await r.json();
+  } catch (e) { deconnexion(); return; }
+
+  $("ecran-login").style.display = "none";
+  $("ecran-app").style.display = "block";
+  const role = MOI.role || "";
+  $("u-nom").textContent = (MOI.nom_complet || MOI.nom || MOI.email || "") + " · " + role;
+  if (role === "ADMIN") { $("p-codes").style.display = "block"; chargerCodes(); }
+  await Promise.all([chargerRegistre(), chargerAttente(),
+                     chargerEcheances(), chargerPrestataires(),
+                     chargerDemandes()]);
+}
+
+// ─────────────── Registre ───────────────
+async function chargerRegistre() {
+  const r = await api("/vgp/machines");
   const rows = await r.json();
-  const tb = document.getElementById("tb");
-  document.getElementById("n").textContent = "— " + rows.length + " machine(s)";
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8" style="color:#64748B;padding:16px;text-align:center">Aucune machine — déposez des PDF ci-dessus</td></tr>'; return; }
-  tb.innerHTML = rows.map(m => `<tr>
-    <td><b>${m.parc}</b></td><td>${m.machine_modele || "—"}</td>
-    <td>${m.date_vgp || "—"}</td><td>${m.echeance || "—"}${m.jours_restants != null ? ` <span style="color:#64748B">(${m.jours_restants}j)</span>` : ""}</td>
-    <td><span class="st ${m.statut}">${m.statut === "BIENTOT" ? "⚠ BIENTÔT" : m.statut}</span>${m.anomalie === "OUI" ? ' <span class="st EXPIREE" title="Anomalie signalée au dernier contrôle">🔴 ANOMALIE</span>' : ""}</td>
-    <td class="file-mini">
-      <a href="/machine.html?parc=${encodeURIComponent(m.parc)}" target="_blank" style="color:#86EFAC">📚 ${m.nb_rapports || 0} rapport(s)</a>
-      · <label style="display:inline;color:#94A3B8;cursor:pointer" title="Ajouter un rapport à l'historique">📤<input type="file" accept=".pdf" style="display:none" onchange="uploader('${m.parc}','vgp',this)"></label>
-    </td>
-    <td class="file-mini">${m.a_fichier_notice ? `<a href="${API}/vgp/public/${m.parc}/document/notice" target="_blank" style="color:#86EFAC">📄 voir</a> · ` : ""}<label style="display:inline;color:#94A3B8;cursor:pointer">📤<input type="file" accept=".pdf" style="display:none" onchange="uploader('${m.parc}','notice',this)"></label></td>
-    <td><button class="bs small" onclick="qr('${m.parc}','${(m.machine_modele || "").replace(/'/g, "")}')">QR</button></td>
-  </tr>`).join("");
+  $("n").textContent = "— " + rows.length + " machine(s)";
+  const tb = $("tb");
+  if (!rows.length) {
+    tb.innerHTML = '<tr><td colspan="9" style="color:#64748B;padding:16px;text-align:center">Aucune machine — déposez des PDF ci-dessus</td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(m => {
+    const bloquee = m.anomalie_active === true;
+    const etat = bloquee
+      ? '<span class="st EXPIREE" title="Anomalie non levée">⛔ NON CONFORME</span>'
+      : `<span class="st ${esc(m.statut)}">${m.statut === "BIENTOT" ? "⚠ BIENTÔT" : esc(m.statut)}</span>`
+        + (m.levee ? ' <span class="st OK" title="Anomalie levée">✅ levée</span>' : "");
+    const att = m.nb_en_attente ? ` <span class="st ATT">${m.nb_en_attente} en attente</span>` : "";
+    const p = encodeURIComponent(m.parc);
+    return `<tr>
+      <td><b>${esc(m.parc)}</b></td>
+      <td>${esc(m.machine_modele || "—")}</td>
+      <td>${esc(m.date_vgp || "—")}</td>
+      <td>${esc(m.echeance || "—")}${m.jours_restants != null ? ` <span style="color:#64748B">(${m.jours_restants}j)</span>` : ""}</td>
+      <td>${etat}${att}</td>
+      <td><a href="/machine.html?m=${encodeURIComponent(m.jeton_public || m.parc)}" target="_blank" style="color:#86EFAC">📚 ${m.nb_rapports || 0} rapport(s)</a></td>
+      <td style="font-size:10px">
+        <label title="Rapport VGP" style="color:#94A3B8;cursor:pointer">📄<input type="file" accept=".pdf" style="display:none" data-parc="${esc(m.parc)}" data-type="vgp"></label>
+        <label title="Notice d'utilisation" style="color:${m.a_fichier_notice ? "#86EFAC" : "#94A3B8"};cursor:pointer">📘<input type="file" accept=".pdf" style="display:none" data-parc="${esc(m.parc)}" data-type="notice"></label>
+        <label title="Fiche technique" style="color:${m.a_fichier_fiche_technique ? "#86EFAC" : "#94A3B8"};cursor:pointer">📐<input type="file" accept=".pdf" style="display:none" data-parc="${esc(m.parc)}" data-type="fiche_technique"></label>
+        <label title="Carnet de maintenance" style="color:${m.a_fichier_carnet ? "#86EFAC" : "#94A3B8"};cursor:pointer">🔧<input type="file" accept=".pdf" style="display:none" data-parc="${esc(m.parc)}" data-type="carnet"></label>
+        <label title="Photographie de la machine" style="color:${m.a_photo ? "#86EFAC" : "#94A3B8"};cursor:pointer">📷<input type="file" accept="image/*" style="display:none" data-parc="${esc(m.parc)}" data-type="photo"></label>
+      </td>
+      <td><button class="bs small" data-ct="${esc(m.parc)}">contrats</button></td>
+      <td><button class="bs small" data-qr="${esc(m.parc)}" data-mod="${esc(m.machine_modele || "")}" data-jeton="${esc(m.jeton_public || "")}">QR</button></td>
+    </tr>`;
+  }).join("");
+
+  tb.querySelectorAll('input[type=file]').forEach(i =>
+    i.addEventListener("change", e => televerser(i.dataset.parc, i.dataset.type, i)));
+  tb.querySelectorAll("[data-ct]").forEach(b =>
+    b.addEventListener("click", () => contratsMachine(b.dataset.ct)));
+  tb.querySelectorAll("[data-qr]").forEach(b =>
+    b.addEventListener("click", () => qr(b.dataset.qr, b.dataset.mod, b.dataset.jeton)));
 }
 
-async function upsert() {
+// ─────────────── File d'attente ───────────────
+async function chargerAttente() {
+  const r = await api("/vgp/rapports/en-attente");
+  const j = await r.json();
+  const p = $("p-attente");
+  if (!j.total) { p.style.display = "none"; return; }
+  p.style.display = "block";
+  $("n-attente").textContent = j.total;
+  $("tb-attente").innerHTML = j.rapports.map(x => {
+    const vieux = x.anciennete_jours != null && x.anciennete_jours > 21;
+    return `<tr>
+      <td><b>${esc(x.parc)}</b></td>
+      <td>${esc(x.machine_modele || "—")}</td>
+      <td>${esc(x.date_vgp || "—")}</td>
+      <td style="color:${vieux ? "#FCA5A5" : "#94A3B8"};font-weight:${vieux ? 800 : 400}">
+        ${x.anciennete_jours != null ? x.anciennete_jours + " j" : "—"}${vieux ? " ⚠" : ""}</td>
+      <td>${x.anomalie === "OUI" ? '<span class="st EXPIREE">🔴 OUI</span>' :
+            (x.anomalie === "NON" ? '<span class="st OK">non</span>' : "—")}</td>
+      <td style="font-size:11px;color:#94A3B8;max-width:320px">${esc(x.observations || "—")}</td>
+      <td style="white-space:nowrap">
+        ${x.anomalie === "OUI"
+          ? `<button class="bg small" data-lv="${x.id}" data-parc="${esc(x.parc)}" data-obs="${esc(x.observations || "")}">✅ Lever</button> `
+          : ""}
+        <button class="bs small" data-pub="${x.id}">Publier</button>
+      </td>
+    </tr>`;
+  }).join("");
+
+  $("tb-attente").querySelectorAll("[data-pub]").forEach(b =>
+    b.addEventListener("click", () => publier(b.dataset.pub)));
+  $("tb-attente").querySelectorAll("[data-lv]").forEach(b =>
+    b.addEventListener("click", () => ouvrirLevee(b.dataset.lv, b.dataset.parc, b.dataset.obs)));
+}
+
+async function publier(rid) {
+  if (!confirm("Publier ce rapport ? Il deviendra visible au scan du QR code par le locataire.")) return;
+  const r = await api(`/vgp/rapports/${rid}/publier`, { method: "POST" });
+  if (r.status === 403) { alert("Vous n'êtes pas habilité à publier un rapport."); return; }
+  if (!r.ok) { alert("Publication impossible."); return; }
+  await Promise.all([chargerRegistre(), chargerAttente()]);
+}
+
+// ─────────────── Levée d'anomalie ───────────────
+let LV_RID = null;
+function ouvrirLevee(rid, parc, obs) {
+  LV_RID = rid;
+  $("lv-ctx").innerHTML = `Machine <b>${esc(parc)}</b> — réserves relevées :<br>${esc(obs || "—")}`;
+  $("lv-desc").value = "";
+  $("lv-file").value = "";
+  $("lv-pub").checked = true;
+  $("lv-err").style.display = "none";
+  $("lv-date").value = new Date().toISOString().slice(0, 10);
+  ouvrir("m-levee");
+  $("lv-desc").focus();
+}
+
+async function enregistrerLevee() {
+  const err = $("lv-err");
+  err.style.display = "none";
+  const desc = $("lv-desc").value.trim();
+  if (!desc) { err.textContent = "La description de l'intervention est obligatoire."; err.style.display = "block"; return; }
+  const fd = new FormData();
+  fd.append("description", desc);
+  fd.append("date_levee", $("lv-date").value || "");
+  fd.append("publier", $("lv-pub").checked ? "true" : "false");
+  const f = $("lv-file").files[0];
+  if (f) fd.append("justificatif", f);
+
+  const r = await api(`/vgp/rapports/${LV_RID}/levee`, { method: "POST", body: fd });
+  if (!r.ok) {
+    let m = "Enregistrement impossible.";
+    if (r.status === 403) m = "Vous n'êtes pas habilité à lever une anomalie.";
+    else { try { m = (await r.json()).detail || m; } catch (e) {} }
+    err.textContent = m; err.style.display = "block";
+    return;
+  }
+  fermer("m-levee");
+  await Promise.all([chargerRegistre(), chargerAttente()]);
+}
+
+// ─────────────── Contrats ───────────────
+let CT_PARC = null;
+async function contratsMachine(parc) {
+  CT_PARC = parc;
+  const r = await api("/vgp/contrats?parc=" + encodeURIComponent(parc));
+  const rows = await r.json();
+  $("cl-body").innerHTML = `
+    <div class="note" style="margin-top:0">Machine <b>${esc(parc)}</b></div>
+    ${rows.length ? `<table style="margin-top:10px">
+      <thead><tr><th>Contrat</th><th>Client</th><th>Période</th><th>Code</th><th>État</th><th></th></tr></thead>
+      <tbody>${rows.map(c => `<tr>
+        <td>${esc(c.numero_contrat)}</td>
+        <td>${esc(c.client_nom)}</td>
+        <td style="font-size:11px">${esc(c.date_debut || "—")}<br>→ ${esc(c.date_fin || "en cours")}</td>
+        <td><b style="letter-spacing:2px;color:#FF7043">${esc(c.code_acces)}</b></td>
+        <td>${c.actif ? '<span class="st OK">actif</span>' : '<span class="st INCONNUE">clos</span>'}</td>
+        <td>${c.actif ? `<button class="bs small" data-rev="${c.id}">révoquer</button>` : ""}</td>
+      </tr>`).join("")}</tbody></table>`
+      : '<div class="note">Aucun contrat enregistré pour cette machine.</div>'}
+    <button class="bp small" id="cl-new" style="margin-top:12px">+ Nouveau contrat</button>`;
+
+  $("cl-body").querySelectorAll("[data-rev]").forEach(b =>
+    b.addEventListener("click", async () => {
+      if (!confirm("Révoquer ce code ? Le locataire perdra immédiatement l'accès.")) return;
+      await api(`/vgp/contrats/${b.dataset.rev}/revoquer`, { method: "POST" });
+      contratsMachine(parc);
+    }));
+  $("cl-new").addEventListener("click", () => { fermer("m-contrats-liste"); ouvrirContrat(parc); });
+  ouvrir("m-contrats-liste");
+}
+
+function ouvrirContrat(parc) {
+  CT_PARC = parc;
+  $("ct-ctx").innerHTML = `Machine <b>${esc(parc)}</b>`;
+  ["ct-num", "ct-client", "ct-chantier", "ct-ville", "ct-fin"].forEach(i => $(i).value = "");
+  $("ct-deb").value = new Date().toISOString().slice(0, 10);
+  $("ct-err").style.display = "none";
+  $("ct-res").innerHTML = "";
+  $("ct-ok").style.display = "";
+  ouvrir("m-contrat");
+}
+
+async function creerContrat() {
+  const err = $("ct-err");
+  err.style.display = "none";
   const fd = new URLSearchParams();
-  fd.append("parc", document.getElementById("f-parc").value);
-  fd.append("machine_modele", document.getElementById("f-mod").value);
-  fd.append("date_vgp", document.getElementById("f-date").value);
-  const r = await fetch(API + "/vgp/machines", { method: "POST",
-    headers: { Authorization: "Bearer " + TOKEN, "Content-Type": "application/x-www-form-urlencoded" },
-    body: fd });
-  if (r.ok) { document.getElementById("f-parc").value = ""; charger(); }
-  else alert("Erreur : " + (await r.text()));
+  fd.append("parc", CT_PARC);
+  fd.append("numero_contrat", $("ct-num").value.trim());
+  fd.append("client_nom", $("ct-client").value.trim());
+  fd.append("chantier", $("ct-chantier").value.trim());
+  fd.append("ville", $("ct-ville").value.trim());
+  fd.append("date_debut", $("ct-deb").value);
+  fd.append("date_fin", $("ct-fin").value);
+  if (!fd.get("numero_contrat") || !fd.get("client_nom") || !fd.get("date_debut")) {
+    err.textContent = "N° de contrat, client et date de début sont obligatoires.";
+    err.style.display = "block"; return;
+  }
+  const r = await api("/vgp/contrats", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+  if (!r.ok) {
+    let m = "Création impossible."; try { m = (await r.json()).detail || m; } catch (e) {}
+    err.textContent = m; err.style.display = "block"; return;
+  }
+  const j = await r.json();
+  $("ct-ok").style.display = "none";
+  $("ct-res").innerHTML = `
+    <div class="code-box">
+      <div style="font-size:11px;color:#94A3B8;margin-bottom:6px">CODE D'ACCÈS DU LOCATAIRE</div>
+      <div class="v">${esc(j.code_acces)}</div>
+      <div style="font-size:11px;color:#64748B;margin-top:8px">
+        À reporter sur le contrat remis au client. Il cesse de fonctionner au terme de la location.
+      </div>
+    </div>`;
+  chargerRegistre();
 }
 
-async function uploader(parc, type, input) {
+// ─────────────── Codes de service ───────────────
+async function chargerCodes() {
+  const r = await api("/vgp/codes-agent");
+  if (!r.ok) return;
+  const rows = await r.json();
+  $("tb-codes").innerHTML = rows.length ? rows.map(c => `<tr>
+      <td>${esc(c.libelle)}</td>
+      <td><b style="letter-spacing:2px;color:#FF7043">${esc(c.code)}</b></td>
+      <td>${esc(c.portee)}</td>
+      <td>${c.actif ? '<span class="st OK">actif</span>' : '<span class="st INCONNUE">révoqué</span>'}</td>
+      <td>${c.actif ? `<button class="bs small" data-rc="${c.id}">révoquer</button>` : ""}</td>
+    </tr>`).join("")
+    : '<tr><td colspan="5" style="color:#64748B;text-align:center;padding:12px">Aucun code de service</td></tr>';
+  $("tb-codes").querySelectorAll("[data-rc]").forEach(b =>
+    b.addEventListener("click", async () => {
+      if (!confirm("Révoquer ce code ? Tous les agents qui l'utilisent perdront l'accès.")) return;
+      await api(`/vgp/codes-agent/${b.dataset.rc}/revoquer`, { method: "POST" });
+      chargerCodes();
+    }));
+}
+
+// ─────────────── Échéances VGP ───────────────
+let PRESTATAIRES = [];
+
+async function chargerEcheances() {
+  const r = await api("/vgp/echeances");
+  if (!r.ok) return;
+  const j = await r.json();
+  const p = $("p-ech");
+  if (!j.total) { p.style.display = "none"; return; }
+  p.style.display = "block";
+  $("n-ech").textContent = j.total + (j.expirees ? ` · ${j.expirees} expirée(s)` : "");
+
+  $("tb-ech").innerHTML = j.machines.map(m => {
+    const urgent = m.jours_restants < 0;
+    const proche = m.jours_restants >= 0 && m.jours_restants <= 10;
+    return `<tr>
+      <td>${m.demande_en_cours ? "" :
+        `<input type="checkbox" class="ech-c" value="${esc(m.parc)}" style="width:15px;height:15px">`}</td>
+      <td><b>${esc(m.parc)}</b></td>
+      <td>${esc(m.machine_modele || "—")}</td>
+      <td>${esc(m.echeance || "—")}</td>
+      <td style="color:${urgent ? "#FCA5A5" : proche ? "#FDE68A" : "#94A3B8"};font-weight:${urgent ? 800 : 400}">
+        ${urgent ? "expirée depuis " + Math.abs(m.jours_restants) + " j"
+                 : m.jours_restants + " j"}</td>
+      <td>${m.sur_chantier ? '<span class="st BIENTOT">sur chantier</span>'
+                           : '<span class="st INCONNUE">dépôt</span>'}</td>
+      <td style="font-size:11px;color:#94A3B8">
+        ${esc(m.client || "—")}${m.lieu ? "<br>" + esc(m.lieu) : ""}
+        ${m.fin_location ? `<br><span style="color:#64748B">fin location ${esc(m.fin_location)}</span>` : ""}</td>
+      <td>${m.demande_en_cours ? '<span class="st OK">demandée</span>' : ""}</td>
+    </tr>`;
+  }).join("");
+
+  $("ech-all").checked = false;
+  $("ech-all").onclick = e =>
+    document.querySelectorAll(".ech-c").forEach(c => c.checked = e.target.checked);
+}
+
+async function chargerPrestataires() {
+  const r = await api("/vgp/prestataires");
+  if (!r.ok) return;
+  PRESTATAIRES = await r.json();
+  $("d-presta").innerHTML = PRESTATAIRES.filter(p => p.actif)
+    .map(p => `<option value="${p.id}">${esc(p.nom)}</option>`).join("")
+    || '<option value="">— aucun prestataire enregistré —</option>';
+}
+
+async function creerDemande() {
+  const parcs = [...document.querySelectorAll(".ech-c:checked")].map(c => c.value);
+  const res = $("d-res");
+  if (!parcs.length) {
+    res.innerHTML = '<div class="alerte">Sélectionnez au moins une machine.</div>';
+    return;
+  }
+  const presta = $("d-presta").value;
+  if (!presta) {
+    res.innerHTML = '<div class="alerte">Aucun prestataire sélectionné.</div>';
+    return;
+  }
+  const fd = new URLSearchParams();
+  fd.append("prestataire_id", presta);
+  fd.append("parcs", parcs.join(","));
+  fd.append("date_souhaitee", $("d-date").value || "");
+  fd.append("commentaire", $("d-comm").value.trim());
+  const r = await api("/vgp/demandes", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+  if (!r.ok) {
+    let m = "Création impossible.";
+    if (r.status === 403) m = "Vous n'êtes pas habilité à créer une demande.";
+    else { try { m = (await r.json()).detail || m; } catch (e) {} }
+    res.innerHTML = `<div class="alerte">${esc(m)}</div>`;
+    return;
+  }
+  const j = await r.json();
+  res.innerHTML = `<div style="color:#86EFAC;font-weight:700">
+    ✅ Demande ${esc(j.reference)} créée (${j.nb_machines} machine(s), ${esc(j.prestataire)}) —
+    à valider ci-dessous pour envoi.</div>`;
+  $("d-comm").value = "";
+  await Promise.all([chargerEcheances(), chargerDemandes()]);
+}
+
+// ─────────────── Demandes d'intervention ───────────────
+async function chargerDemandes() {
+  const r = await api("/vgp/demandes");
+  if (!r.ok) return;
+  const rows = await r.json();
+  const p = $("p-dem");
+  if (!rows.length) { p.style.display = "none"; return; }
+  p.style.display = "block";
+  $("tb-dem").innerHTML = rows.map(d => {
+    const chantier = d.machines.filter(m => m.sur_chantier).length;
+    const st = { BROUILLON: '<span class="st ATT">à valider</span>',
+                 VALIDEE:   '<span class="st BIENTOT">validée · non envoyée</span>',
+                 ENVOYEE:   '<span class="st OK">envoyée</span>',
+                 ANNULEE:   '<span class="st INCONNUE">annulée</span>' }[d.statut] || d.statut;
+    return `<tr>
+      <td><b>${esc(d.reference)}</b>${d.date_souhaitee ?
+        `<br><span style="font-size:10px;color:#64748B">souhaitée ${esc(d.date_souhaitee)}</span>` : ""}</td>
+      <td>${esc(d.prestataire || "—")}<br><span style="font-size:10px;color:#64748B">${esc(d.prestataire_email || "")}</span></td>
+      <td>${d.machines.length}${chantier ? `<br><span style="font-size:10px;color:#FDE68A">${chantier} sur chantier</span>` : ""}</td>
+      <td>${st}${d.erreur_envoi ? `<br><span style="font-size:10px;color:#FCA5A5" title="${esc(d.erreur_envoi)}">envoi échoué</span>` : ""}</td>
+      <td style="font-size:11px">${esc(d.valide_par || "—")}${d.envoye_le ?
+        `<br><span style="color:#64748B">${esc(d.envoye_le.slice(0, 16).replace("T", " "))}</span>` : ""}</td>
+      <td style="white-space:nowrap">
+        ${d.statut === "BROUILLON"
+          ? `<button class="bg small" data-val="${d.id}">✅ Valider et envoyer</button>
+             <button class="bs small" data-ann="${d.id}">annuler</button>`
+          : ""}
+        ${d.a_pdf ? `<a class="bs small" style="text-decoration:none;padding:5px 9px"
+             href="${API}/vgp/demandes/${d.id}/pdf" target="_blank">PDF ↓</a>` : ""}
+        ${d.statut === "VALIDEE" && d.erreur_envoi
+          ? `<button class="bs small" data-val="${d.id}">réessayer l'envoi</button>` : ""}
+      </td>
+    </tr>`;
+  }).join("");
+
+  $("tb-dem").querySelectorAll("[data-val]").forEach(b =>
+    b.addEventListener("click", () => validerDemande(b.dataset.val)));
+  $("tb-dem").querySelectorAll("[data-ann]").forEach(b =>
+    b.addEventListener("click", async () => {
+      if (!confirm("Annuler cette demande ?")) return;
+      await api(`/vgp/demandes/${b.dataset.ann}/annuler`, { method: "POST" });
+      await Promise.all([chargerEcheances(), chargerDemandes()]);
+    }));
+}
+
+async function validerDemande(did) {
+  if (!confirm("Valider cette demande et l'envoyer au prestataire ?\n\n"
+             + "Un bon de commande engage l'entreprise.")) return;
+  const fd = new URLSearchParams(); fd.append("envoyer", "true");
+  const r = await api(`/vgp/demandes/${did}/valider`, {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+  if (!r.ok) {
+    alert(r.status === 403 ? "Vous n'êtes pas habilité à valider une demande."
+                           : "Validation impossible.");
+    return;
+  }
+  const j = await r.json();
+  if (j.erreur_envoi) {
+    alert("Demande validée et bon de commande généré, mais l'envoi du courriel a échoué :\n\n"
+        + j.erreur_envoi + "\n\nTéléchargez le PDF et envoyez-le manuellement.");
+  }
+  await Promise.all([chargerEcheances(), chargerDemandes()]);
+}
+
+// ─────────────── Dépôts ───────────────
+async function televerser(parc, type, input) {
   const f = input.files[0]; if (!f) return;
   const fd = new FormData(); fd.append("file", f);
-  const r = await fetch(`${API}/vgp/machines/${parc}/document?type=${type}`, {
-    method: "POST", headers: { Authorization: "Bearer " + TOKEN }, body: fd });
-  if (!r.ok) { alert("Upload impossible"); return; }
+  const r = await api(`/vgp/machines/${encodeURIComponent(parc)}/document?type=${type}`,
+                      { method: "POST", body: fd });
+  input.value = "";
+  if (!r.ok) { alert("Dépôt impossible."); return; }
   const j = await r.json();
-  charger();
-  if (type === "vgp" && j.analyse) montrerAnalyse(parc, j.analyse);
+  if (type === "vgp" && j.doublon) alert("Ce rapport est déjà présent dans l'historique.");
+  await Promise.all([chargerRegistre(), chargerAttente()]);
 }
-
-function montrerAnalyse(parc, a) {
-  const b = document.getElementById("an-body");
-  if (!a.lecture_ok) { b.innerHTML = `<span style="color:#FCA5A5">${a.erreur}</span>`; }
-  else {
-    const conf = a.parc_conforme
-      ? '<span style="color:#86EFAC;font-weight:800">✅ n° de parc CONFORME (' + a.parc_attendu + ' trouvé dans le PDF)</span>'
-      : '<span style="color:#FCA5A5;font-weight:800">⚠ n° de parc NON RETROUVÉ dans le PDF' + (a.parc_detecte ? " — parc détecté : " + a.parc_detecte : "") + '</span>';
-    b.innerHTML =
-      conf + "<br>" +
-      "📅 Date de vérification détectée : <b>" + (a.date_detectee || "— non détectée") + "</b><br>" +
-      "🔢 N° de série détecté : <b>" + (a.serie_detectee || "—") + "</b><br>" +
-      "📝 Observations : <i>" + (a.observations || "aucune détectée") + "</i>" +
-      (a.avertissements && a.avertissements.length ? '<div style="color:#FDE68A;margin-top:8px">' + a.avertissements.join("<br>") + "</div>" : "");
-  }
-  document.getElementById("anmodal").style.display = "flex";
-}
-
-// ── Dépôt en masse : chaque PDF est AJOUTÉ à l'historique de sa machine ──
-const drop = document.getElementById("drop");
-const pdfs = document.getElementById("pdfs");
-drop.addEventListener("click", () => pdfs.click());
-drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.style.borderColor = "#E65100"; });
-drop.addEventListener("dragleave", () => drop.style.borderColor = "#1E2F5A");
-drop.addEventListener("drop", (e) => { e.preventDefault(); drop.style.borderColor = "#1E2F5A"; importer(e.dataTransfer.files); });
-pdfs.addEventListener("change", () => importer(pdfs.files));
 
 async function importer(fileList) {
   const files = [...fileList].filter(f => f.name.toLowerCase().endsWith(".pdf"));
   if (!files.length) return;
-  const rc = document.getElementById("recap");
+  const rc = $("recap");
   rc.innerHTML = `<div style="color:#94A3B8">⏳ Lecture de ${files.length} PDF…</div>`;
   const fd = new FormData();
   files.forEach(f => fd.append("files", f));
-  const r = await fetch(API + "/vgp/import-pdfs", { method: "POST",
-    headers: { Authorization: "Bearer " + TOKEN }, body: fd });
-  if (!r.ok) { rc.innerHTML = '<div style="color:#FCA5A5">Erreur d\'import</div>'; return; }
+  const r = await api("/vgp/import-pdfs", { method: "POST", body: fd });
+  if (!r.ok) { rc.innerHTML = '<div class="alerte">Erreur d\'import.</div>'; return; }
   const j = await r.json();
   rc.innerHTML =
-    `<div style="font-weight:800;margin-bottom:8px">✅ ${j.inserees}/${j.total} rapport(s) ajoutés à l'historique` +
+    `<div style="font-weight:800;margin-bottom:8px">✅ ${j.inserees}/${j.total} rapport(s) ajoutés` +
+    (j.en_attente ? ` — <span style="color:#FDE68A">⏳ ${j.en_attente} en attente de l'atelier</span>` : "") +
+    (j.doublons ? ` — <span style="color:#94A3B8">♻ ${j.doublons} déjà présent(s)</span>` : "") +
     (j.a_verifier ? ` — <span style="color:#FDE68A">⚠ ${j.a_verifier} à vérifier</span>` : "") + `</div>` +
     `<table><thead><tr><th>Fichier</th><th>Parc</th><th>Date VGP</th><th>Anomalie</th><th>Statut</th></tr></thead><tbody>` +
-    j.details.map(d => d.statut === "INSEREE"
-      ? `<tr><td>${d.fichier}</td><td><b>${d.parc}</b></td><td>${d.date || "—"}</td><td>${d.anomalie === "OUI" ? '<span class="st EXPIREE">🔴 OUI</span>' : (d.anomalie === "NON" ? '<span class="st OK">non</span>' : "—")}</td><td><span class="st OK">ajoutée</span></td></tr>`
-      : `<tr><td>${d.fichier}</td><td colspan="2" style="color:#FDE68A">${d.detail}</td>
-           <td></td>
-           <td><span class="st BIENTOT">à vérifier</span></td></tr>`).join("") +
-    `</tbody></table>` +
-    `<div style="color:#64748B;font-size:10px;margin-top:6px">Cas « à vérifier » : le parc n'apparaît pas dans le PDF — créer/retrouver la machine puis re-déposer le fichier via 📤 sur sa ligne.</div>`;
-  charger();
+    j.details.map(d => {
+      if (d.statut === "INSEREE") return `<tr><td>${esc(d.fichier)}</td><td><b>${esc(d.parc)}</b></td>
+        <td>${esc(d.date || "—")}</td>
+        <td>${d.anomalie === "OUI" ? '<span class="st EXPIREE">🔴 OUI</span>' :
+             (d.anomalie === "NON" ? '<span class="st OK">non</span>' : "—")}</td>
+        <td>${d.publie ? '<span class="st PUB">publié</span>' : '<span class="st ATT">en attente</span>'}</td></tr>`;
+      if (d.statut === "DOUBLON") return `<tr><td>${esc(d.fichier)}</td><td><b>${esc(d.parc)}</b></td>
+        <td>${esc(d.date || "—")}</td><td>—</td><td><span class="st INCONNUE">♻ déjà présent</span></td></tr>`;
+      return `<tr><td>${esc(d.fichier)}</td><td colspan="3" style="color:#FDE68A">${esc(d.detail || "")}</td>
+        <td><span class="st BIENTOT">à vérifier</span></td></tr>`;
+    }).join("") + `</tbody></table>` +
+    `<div class="note">Un rapport « à vérifier » n'a pas de n° de parc lisible : créez la machine puis re-déposez le fichier via 📄 sur sa ligne.</div>`;
+  await Promise.all([chargerRegistre(), chargerAttente()]);
 }
 
-function qr(parc, mod) {
-  document.getElementById("qrdiv").innerHTML = "";
-  new QRCode(document.getElementById("qrdiv"), {
-    text: location.origin + "/machine.html?parc=" + encodeURIComponent(parc),
-    width: 190, height: 190 });
-  document.getElementById("qr-parc").textContent = "PARC " + parc;
-  document.getElementById("qr-mod").textContent = mod;
-  document.getElementById("qrmodal").style.display = "flex";
+async function upsert() {
+  const fd = new URLSearchParams();
+  fd.append("parc", $("f-parc").value);
+  fd.append("machine_modele", $("f-mod").value);
+  fd.append("date_vgp", $("f-date").value);
+  const r = await api("/vgp/machines", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+  if (r.ok) { $("f-parc").value = ""; $("f-mod").value = ""; chargerRegistre(); }
+  else alert("Erreur : " + (await r.text()));
 }
 
-(async () => { await login(); await charger(); })();
+function qr(parc, mod, jeton) {
+  $("qrdiv").innerHTML = "";
+  // Le QR porte le jeton opaque, jamais le n° de parc : celui-ci étant
+  // séquentiel, l'exposer permettrait de parcourir tout le parc machine.
+  const ref = jeton || parc;
+  new QRCode($("qrdiv"), { text: location.origin + "/machine.html?m=" + encodeURIComponent(ref),
+                           width: 190, height: 190 });
+  $("qr-parc").textContent = "PARC " + parc;
+  $("qr-mod").textContent = mod || "";
+  ouvrir("qrmodal");
+}
+
+// ─────────────── Événements ───────────────
+$("l-btn").addEventListener("click", connexion);
+$("l-pass").addEventListener("keydown", e => { if (e.key === "Enter") connexion(); });
+$("btn-quit").addEventListener("click", deconnexion);
+$("btn-upsert").addEventListener("click", upsert);
+$("btn-demande").addEventListener("click", creerDemande);
+$("lv-ok").addEventListener("click", enregistrerLevee);
+$("lv-no").addEventListener("click", () => fermer("m-levee"));
+$("ct-ok").addEventListener("click", creerContrat);
+$("ct-no").addEventListener("click", () => { fermer("m-contrat"); });
+$("cl-no").addEventListener("click", () => fermer("m-contrats-liste"));
+$("qr-no").addEventListener("click", () => fermer("qrmodal"));
+$("btn-code").addEventListener("click", async () => {
+  const lib = $("ca-lib").value.trim();
+  if (!lib) { alert("Libellé requis."); return; }
+  const fd = new URLSearchParams();
+  fd.append("libelle", lib);
+  fd.append("portee", $("ca-portee").value);
+  const r = await api("/vgp/codes-agent", {
+    method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: fd });
+  if (!r.ok) { alert("Création impossible."); return; }
+  $("ca-lib").value = "";
+  chargerCodes();
+});
+
+const drop = $("drop"), pdfs = $("pdfs");
+drop.addEventListener("click", () => pdfs.click());
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.style.borderColor = "#E65100"; });
+drop.addEventListener("dragleave", () => drop.style.borderColor = "#1E2F5A");
+drop.addEventListener("drop", e => { e.preventDefault(); drop.style.borderColor = "#1E2F5A"; importer(e.dataTransfer.files); });
+pdfs.addEventListener("change", () => { importer(pdfs.files); pdfs.value = ""; });
+
+document.querySelectorAll(".modal").forEach(m =>
+  m.addEventListener("click", e => { if (e.target === m) m.style.display = "none"; }));
+
+// ─────────────── Démarrage ───────────────
+(function () {
+  try { TOKEN = sessionStorage.getItem(CLE_TOKEN); } catch (e) {}
+  if (TOKEN) demarrer(); else { $("ecran-login").style.display = "block"; $("l-email").focus(); }
+})();
 </script>
 </body>
 </html>
