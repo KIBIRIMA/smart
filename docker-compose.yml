@@ -33,6 +33,7 @@ services:
       - "8000"      
     volumes:
        - cachedata:/code/cache_data
+       - vgpdocs:/code/vgp_docs
     env_file: .env
     environment:
       POSTGRES_HOST: db
@@ -116,7 +117,9 @@ services:
 volumes:
   pgdata:
   redisdata:
+  certbot_www:
   cachedata:
+  vgpdocs:
 
 networks:
   sta_net:
