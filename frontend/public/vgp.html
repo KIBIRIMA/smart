@@ -313,6 +313,35 @@ const $ = id => document.getElementById(id);
 const ouvrir = id => { $(id).style.display = "flex"; };
 const fermer = id => { $(id).style.display = "none"; };
 
+// Un lien <a> ouvert dans un onglet ne transporte aucun en-tête HTTP : le
+// jeton d'authentification n'accompagne donc pas la requête, et le serveur
+// répond « Not authenticated ». On récupère le fichier en JavaScript, avec
+// l'en-tête, puis on l'ouvre depuis la mémoire du navigateur — le jeton ne
+// circule jamais dans l'URL, où il finirait dans l'historique et les
+// journaux du serveur.
+async function ouvrirProtege(chemin, nomFichier) {
+  try {
+    const r = await api(chemin);
+    if (!r.ok) {
+      alert(r.status === 404 ? "Document non disponible."
+                             : "Téléchargement impossible (" + r.status + ").");
+      return;
+    }
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    if (nomFichier) a.download = nomFichier; else a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Laisser au navigateur le temps d'ouvrir le fichier avant libération.
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (e) {
+    alert("Téléchargement impossible.");
+  }
+}
+
 async function api(chemin, options = {}) {
   const o = Object.assign({}, options);
   o.headers = Object.assign({}, o.headers || {}, { Authorization: "Bearer " + TOKEN });
@@ -700,14 +729,17 @@ async function chargerDemandes() {
           ? `<button class="bg small" data-val="${d.id}">✅ Valider et envoyer</button>
              <button class="bs small" data-ann="${d.id}">annuler</button>`
           : ""}
-        ${d.a_pdf ? `<a class="bs small" style="text-decoration:none;padding:5px 9px"
-             href="${API}/vgp/demandes/${d.id}/pdf" target="_blank">PDF ↓</a>` : ""}
+        ${d.a_pdf ? `<button class="bs small" data-pdf="${d.id}"
+             data-nom="${esc(d.reference)}.pdf">PDF ↓</button>` : ""}
         ${d.statut === "VALIDEE" && d.erreur_envoi
           ? `<button class="bs small" data-val="${d.id}">réessayer l'envoi</button>` : ""}
       </td>
     </tr>`;
   }).join("");
 
+  $("tb-dem").querySelectorAll("[data-pdf]").forEach(b =>
+    b.addEventListener("click", () =>
+      ouvrirProtege(`/vgp/demandes/${b.dataset.pdf}/pdf`, b.dataset.nom)));
   $("tb-dem").querySelectorAll("[data-val]").forEach(b =>
     b.addEventListener("click", () => validerDemande(b.dataset.val)));
   $("tb-dem").querySelectorAll("[data-ann]").forEach(b =>
