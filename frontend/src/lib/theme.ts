@@ -25,8 +25,8 @@ export const C = {
 
   border:  "#E2E8F2",
   text:    "#0C1B2E", // texte principal (foncé sur clair)
-  textMid: "#5A6B82",
-  textDim: "#8A99AD",
+  textMid: "#47566B", // AA 7.47:1 sur blanc
+  textDim: "#64748B", // AA 4.76:1 sur blanc (était #8A99AD → 2.9:1, illisible)
 
   // ————— Codes métier —————
   green:  "#1B9E5A", // CONFORME
@@ -45,10 +45,11 @@ export const C = {
   cardAlt:    "#FBFCFE",
   borderStrong: "#CBD5E8",
   track:      "#E9EEF6",
-  textMut:    "#5A6B82",
-  textFaint:  "#8A99AD",
+  textMut:    "#47566B",
+  textFaint:  "#64748B",
   ok:     "#1B9E5A", okBg: "#E5F5EC",
   danger: "#E63946", dangerBg: "#FCE8EA",
+  action: "#E63946", // action primaire (boutons) — remplace l'ancien C.orange décoratif
   warn:   "#E67A00", warnBg: "#FDF0E1",
 
   // Plateau 2.5D — 4 catégories (codes fixes)
