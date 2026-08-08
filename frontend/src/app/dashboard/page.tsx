@@ -6,6 +6,8 @@ import { Card, StatusChip, Bar, EmptyState, Skeleton } from "@/components/ui";
 import { useKpi, useTournees, useMissions } from "@/hooks/useApi";
 import { C } from "@/lib/theme";
 import Link from "next/link";
+import DashboardCharts from "@/components/DashboardCharts";
+
 
 export default function DashboardPage() {
   const { data: kpi, isLoading: kl } = useKpi();
@@ -18,6 +20,7 @@ export default function DashboardPage() {
         actions={<Link href="/optimisation" style={btnPrimary}>⚡ Lancer une optimisation</Link>} />
 
       <KpiGrid kpi={kpi} loading={kl} />
+      <DashboardCharts tauxRemplissage={kpi?.taux_remplissage} />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 14 }}>
         <Card>
