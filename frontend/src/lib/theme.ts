@@ -1,12 +1,73 @@
-// Design system — Midnight Industrial (cohérent avec la maquette validée)
+// Design system — Smart Transport AI
+// Refonte "clair marine + rouge" (Power BI), rétrocompatible.
+//
+// Les anciennes clés (navy, bg, bgCard, orange, text, green, red…) sont
+// CONSERVÉES avec des valeurs claires : tous tes composants existants
+// (ui.tsx, Sidebar, Navbar, Kpi, PageHeader) tournent sans changer d'API.
+// De nouvelles clés (brand, card, accent, track, ok, warn, danger, ciseaux…)
+// sont ajoutées pour les dataviz Power BI. TC et ROLE_LABEL préservés.
+
 export const C = {
-  navy: "#071730", navyMid: "#0D2545", navyLt: "#1A3A5C",
-  orange: "#E65100", orangeL: "#FF7043", orangeD: "#BF360C",
-  bg: "#060F1E", bgCard: "#0B1A2E", bgHover: "#0F2240",
-  border: "#1E3A5F", text: "#E2E8F0", textMid: "#94A3B8", textDim: "#4A6080",
-  green: "#10B981", yellow: "#F59E0B", red: "#EF4444", purple: "#8B5CF6", cyan: "#06B6D4",
+  // ————— Marque / marine (ex navy) —————
+  navy:    "#0A2540", // sidebar, titres, marque
+  navyMid: "#12325A",
+  navyLt:  "#CBD5E8", // ⚠ réutilisé comme "piste" de barre dans ui.tsx → clair
+
+  // ————— Orange métier (échéance / attention / livraison) —————
+  orange:  "#E67A00",
+  orangeL: "#FF8A3D",
+  orangeD: "#BF360C",
+
+  // ————— Surfaces (clair) —————
+  bg:      "#F5F7FB", // fond app
+  bgCard:  "#FFFFFF", // cartes
+  bgHover: "#EEF1F7", // survol / zones creuses
+
+  border:  "#E2E8F2",
+  text:    "#0C1B2E", // texte principal (foncé sur clair)
+  textMid: "#5A6B82",
+  textDim: "#8A99AD",
+
+  // ————— Codes métier —————
+  green:  "#1B9E5A", // CONFORME
+  yellow: "#E67A00", // échéance proche (aligné orange)
+  red:    "#E63946", // ANOMALIE / alerte
+  purple: "#7A4FBF", // récupération
+  cyan:   "#0FB5A6", // (voir note TypeChip ci-dessous)
+
+  // ————— Nouvelles clés Power BI —————
+  brand:      "#0A2540",
+  brandSoft:  "#12325A",
+  brandFaint: "#E7EDF6",
+  accent:     "#2E6BB8",
+  bgSubtle:   "#EEF1F7",
+  card:       "#FFFFFF",
+  cardAlt:    "#FBFCFE",
+  borderStrong: "#CBD5E8",
+  track:      "#E9EEF6",
+  textMut:    "#5A6B82",
+  textFaint:  "#8A99AD",
+  ok:     "#1B9E5A", okBg: "#E5F5EC",
+  danger: "#E63946", dangerBg: "#FCE8EA",
+  warn:   "#E67A00", warnBg: "#FDF0E1",
+
+  // Plateau 2.5D — 4 catégories (codes fixes)
+  ciseaux:      "#1E4E8C",
+  livraison:    "#E67A00",
+  recuperation: "#7A4FBF",
+  fleche:       "#0FB5A6",
+
+  // Forme / typo
+  shadow:   "0 1px 3px rgba(10,37,64,.06), 0 4px 16px rgba(10,37,64,.05)",
+  shadowLg: "0 4px 24px rgba(10,37,64,.10)",
+  radius:   12,
+  radiusSm: 8,
+  font: "'Inter','Segoe UI',system-ui,-apple-system,sans-serif",
+  mono: "'JetBrains Mono','SF Mono',ui-monospace,monospace",
 };
-export const TC = ["#E65100", "#8B5CF6", "#06B6D4", "#10B981", "#F59E0B", "#EC4899", "#6366F1"];
+
+// Palette de séries pour graphes — recalibrée fond clair
+export const TC = ["#0A2540", "#7A4FBF", "#0FB5A6", "#1B9E5A", "#E67A00", "#D63384", "#4C5FD5"];
 
 export const ROLE_LABEL: Record<string, string> = {
   ADMIN: "Administrateur", DSI: "DSI", EXPLOITANT: "Exploitant",
