@@ -6,7 +6,7 @@ export default function PageHeader({ title, subtitle, actions }: { title: string
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
       <div>
-        <h1 style={{ fontSize: 22, fontWeight: 900, letterSpacing: "-.02em" }}>{title}</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-.02em", color: C.brand }}>{title}</h1>
         {subtitle && <p style={{ color: C.textMid, fontSize: 12, marginTop: 2 }}>{subtitle}</p>}
       </div>
       {actions && <div style={{ display: "flex", gap: 8 }}>{actions}</div>}
